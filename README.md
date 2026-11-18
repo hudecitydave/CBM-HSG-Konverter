@@ -5,8 +5,7 @@
 *Photos for the Commodore HSG/LSG high-speed graphics board (EF9365/EF9366) in the CBM 8032/4032: a browser-based converter, disk images, a USB-to-userport link, HP-GL plotting and daisy-wheel ASCII art. Documentation is in German.*
 
 <p align="center">
-  <img src="docs/bilder/cbm8032-hsg-bild.jpg" width="49%" alt="Foto auf dem CBM 8032 mit HSG-Board">
-  <img src="cbm/schraffur-vorschau.png" width="49%" alt="Bildschirm, Kringel- und Schraffur-Plot im Vergleich">
+  <img src="docs/bilder/cbm-bildschirm-blues.jpg" width="90%" alt="Gedithertes Foto auf dem HSG-Bildschirm eines CBM 8032">
 </p>
 
 Alles läuft auf dem Original-CBM, ohne Umbauten am Rechner: Eine Website bereitet das Bild auf, ein kleines 6502-Programm zeigt, empfängt und plottet. Für die Live-Übertragung braucht es nur einen Arduino Pro Micro und ein selbst gelötetes Userport-Kabel.
@@ -85,6 +84,11 @@ Ohne Kabel zum PC: Bilder werden am PC vorbereitet, auf Diskette gebracht und am
 
 Laden und Anzeigen ist der Originalcode des **HSG Image Loaders von AndyG** (Juli 2024). HSGIMAGE allein funktioniert genauso: `load "hsgimage",8`, `run`.
 
+<p align="center">
+  <img src="docs/bilder/cbm-bildschirm-schriftzug.jpg" width="49%" alt="Schriftzug als HSG-Grafik">
+  <img src="docs/bilder/cbm-zwei-monitore.jpg" width="49%" alt="Foto auf zwei CBM-Monitoren">
+</p>
+
 Bildformat: Rohdaten ohne Kopf, 64 Byte je Zeile, oberste Zeile zuerst, höchstes Bit = linker Punkt. EF9365: 512 Zeilen = 32 768 Byte (130 Blöcke), EF9366: 256 Zeilen = 16 384 Byte (65 Blöcke).
 
 ---
@@ -102,6 +106,12 @@ Arduino Pro Micro 5 V / 16 MHz  ── serial/HSGLink/HSGLink.ino
    ▼
 Userport CBM 8032 (VIA 6522)  →  HSGMENU (Taste 2) oder HSGSER  →  HSG-Board
 ```
+
+<p align="center">
+  <img src="docs/bilder/hsg-link-pro-micro.jpg" width="58%" alt="Pro Micro mit Widerständen am User-Port des CBM 8032">
+  <img src="docs/bilder/hsgser-empfang.jpg" width="40%" alt="HSGSER meldet empfangene Bilder">
+</p>
+<p align="center"><sub>Links: Pro Micro mit den 470-Ω-Widerständen, das Kabel steckt am User-Port (blau), rechts daneben das IEEE-Kabel zur Floppy. Rechts: HSGSER am CBM empfängt Bilder vom Browser.</sub></p>
 
 **Hardware bauen**
 - Teile, Verdrahtungstabelle und Lötplan: [`serial/README.md`](serial/README.md) und [`serial/verdrahtung.html`](serial/verdrahtung.html) (zum Ausdrucken).
@@ -232,11 +242,11 @@ Einstellungen und das aktuelle D64 merkt sich der Browser.
 
 ## Anschlüsse am CBM
 
-<p align="center"><img src="docs/bilder/cbm8032-rueckseite.jpg" width="90%" alt="Rückseite des CBM 8032"></p>
+<p align="center"><img src="docs/bilder/hsg-link-pro-micro.jpg" width="80%" alt="Rückseite des CBM 8032 mit User-Port- und IEEE-Stecker"></p>
 
 Rückseite des 8032-32 B, von hinten gesehen:
-- **Rechts, mit Kabel: IEEE-488.** Hier hängen Floppy, Plotter und Drucker hintereinander.
-- **Mitte: User-Port.** Hier steckt das HSG-Link-Kabel. Kontakt 1/A liegt links.
+- **Rechts, grauer Stecker: IEEE-488.** Hier hängen Floppy, Plotter und Drucker hintereinander.
+- **Mitte, blauer Stecker: User-Port.** Hier steckt das HSG-Link-Kabel. Kontakt 1/A liegt links.
 - **Links:** die Kassettenschnittstelle.
 
 Details zur Belegung: [`serial/README.md`](serial/README.md#verdrahtung).
@@ -336,13 +346,10 @@ node tools/test-website.js
 |---|---|
 | Website, Bilder auf Diskette, HSGIMAGE | ✓ |
 | HSG-Link mit HSGSER | ✓ |
-| Plot mit Punkten und Kringeln | ✓ (erste Tests, siehe Bild unten) |
+| Plot mit Punkten und Kringeln | ✓ (erste Tests) |
 | **Plot mit Schraffur, invertiert** | ✓ (DIREKTPLOT, 16.11.2026) |
 | HSGMENU (fasst alles zusammen) | noch nicht, gleicher Code wie DIREKTPLOT und HSGPLOT |
 | Drucker CBM 8028 | noch nicht, in Arbeit |
-
-<p align="center"><img src="docs/bilder/plot-kringel-erster-test.jpg" width="60%" alt="Erster Kringel-Plot, noch nicht invertiert"></p>
-<p align="center"><sub>Erster Versuch im Kringel-Modus, noch ohne Invertierung: gut für den Stift, aber zu flau. Daraus entstand die Schraffur.</sub></p>
 
 ---
 
