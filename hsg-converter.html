@@ -1,0 +1,1655 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HSG-Konverter · Bildschirm, Plotter, 8028</title>
+<style>
+:root{
+  --bg:#f3f4ef; --panel:#ffffff; --ink:#1d211c; --muted:#5f685c; --line:#d6dbd2;
+  --accent:#2f7d3a; --accent-ink:#fff; --warn:#a14b00; --err:#b3261e;
+  --crt-bg:#050805; --crt-fg:#52ff6e; --field:#f7f8f5;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111410; --panel:#1a1e19; --ink:#e4e9e1; --muted:#97a193; --line:#2e352c;
+    --accent:#4fbf5e; --accent-ink:#08130a; --warn:#f0a55a; --err:#ff8a80; --field:#141813;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111410; --panel:#1a1e19; --ink:#e4e9e1; --muted:#97a193; --line:#2e352c;
+  --accent:#4fbf5e; --accent-ink:#08130a; --warn:#f0a55a; --err:#ff8a80; --field:#141813;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+header h1{font-size:17px;margin:0}
+header span{color:var(--muted);font-size:13px}
+main{display:grid;gap:14px;padding:14px 16px;grid-template-columns:290px minmax(0,1fr) 360px;align-items:start}
+@media (max-width:1180px){main{grid-template-columns:290px minmax(0,1fr)} #disk{grid-column:1 / -1}}
+@media (max-width:760px){main{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+.card h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 10px}
+.card + .card{margin-top:14px}
+label.row{display:grid;grid-template-columns:110px 1fr 42px;gap:8px;align-items:center;margin:6px 0;font-size:13px}
+label.row.sel{grid-template-columns:110px 1fr}
+label.chk{display:flex;gap:8px;align-items:center;margin:6px 0;font-size:13px}
+label.row output{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=checkbox]{accent-color:var(--accent)}
+select,input[type=text]{width:100%;background:var(--field);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:5px 7px;font:inherit}
+input.mono{font-family:ui-monospace,Consolas,monospace;text-transform:uppercase}
+button{font:inherit;border:1px solid var(--line);background:var(--field);color:var(--ink);border-radius:6px;padding:6px 10px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button:disabled{opacity:.45;cursor:not-allowed}
+.btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+#drop{border:2px dashed var(--line);border-radius:10px;padding:18px;text-align:center;color:var(--muted);cursor:pointer;transition:.15s}
+#drop.hot,body.dragging #drop{border-color:var(--accent);color:var(--ink);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+#drop b{color:var(--ink)}
+.viewhead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin:14px 0 6px}
+.viewhead h3{margin:0;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.scr{background:var(--crt-bg);border-radius:8px;padding:10px;overflow:auto;max-height:78vh}
+.scr canvas{display:block;width:100%;image-rendering:pixelated;image-rendering:crisp-edges;cursor:grab;touch-action:none;margin:0 auto}
+.scr canvas.fixed{width:auto}
+.scr canvas:active{cursor:grabbing}
+.stats{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:6px}
+.msg{font-size:13px;margin-top:8px;min-height:1.4em}
+.msg.ok{color:var(--accent)} .msg.err{color:var(--err)} .msg.warn{color:var(--warn)}
+.dir{font-family:ui-monospace,Consolas,monospace;font-size:13px;background:#0b0b2a;color:#a5a5ff;border-radius:8px;padding:10px;overflow-x:auto}
+.dir .hd{background:#a5a5ff;color:#0b0b2a;display:inline-block;padding:0 2px;white-space:pre}
+.dir table{border-collapse:collapse;width:100%}
+.dir td{padding:1px 4px;white-space:pre}
+.dir tr.f{cursor:pointer}
+.dir tr.f:hover td{background:#1c1c55}
+.dir tr.sel td{background:#2a2a7a}
+.dir td.act{text-align:right}
+.dir td.act button{padding:0 6px;font-size:11px;background:transparent;color:#a5a5ff;border-color:#4a4aa0}
+details{margin-top:10px;font-size:12px}
+pre.hex{font-family:ui-monospace,Consolas,monospace;font-size:11px;overflow:auto;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:8px;margin:6px 0 0}
+.note{font-size:12px;color:var(--muted)}
+.hidden{display:none}
+.paper{background:#fff;border-radius:8px;padding:10px;overflow:auto;max-height:78vh;border:1px solid var(--line)}
+.paper canvas{display:block;width:100%;max-width:720px;margin:0 auto}
+</style>
+</head>
+<body>
+<header>
+  <h1>HSG-Konverter · Bildschirm, Plotter, Drucker 8028</h1>
+  <span id="subtitle">Bild → 512 × 256 · 1 Bit · 16384 Byte → D64 (für HSG / EF9366 am CBM)</span>
+</header>
+<main>
+  <!-- ========== Einstellungen ========== -->
+  <section id="controls">
+    <div class="card">
+      <h2>Ausgabe</h2>
+      <label class="row sel">Ziel
+        <select id="target">
+          <option value="screen" selected>HSG-Bildschirm (Standard)</option>
+          <option value="plot">Plotter (HP-GL, HSGMENU)</option>
+          <option value="print">Drucker CBM 8028 (Textgrafik)</option>
+        </select></label>
+      <div class="note" id="targetNote"></div>
+    </div>
+    <div class="card">
+      <h2>Grafikchip</h2>
+      <label class="row sel">Chip
+        <select id="chip">
+          <option value="9366" selected>EF9366 · Version B · 512 × 256</option>
+          <option value="9365">EF9365 · Version A · 512 × 512</option>
+        </select></label>
+      <div class="note" id="chipNote"></div>
+    </div>
+    <div class="card">
+      <h2>Bildanpassung</h2>
+      <label class="row sel">Einpassen
+        <select id="fit">
+          <option value="contain">Ganz zeigen (Rand)</option>
+          <option value="cover" selected>Füllen (beschneiden)</option>
+          <option value="stretch">Strecken</option>
+        </select></label>
+      <label class="row sel">Bildschirm
+        <select id="par">
+          <option value="0.525" selected>Laut Datenblatt (Bild ≈ 1,05 : 1)</option>
+          <option value="1">Quadratische Pixel (Bild am CBM gestaucht!)</option>
+          <option value="custom">Eigene Messung …</option>
+        </select></label>
+      <div id="measure" class="hidden">
+        <label class="row sel">Bildbreite (cm)<input type="text" id="mw" value="21"></label>
+        <label class="row sel">Bildhöhe (cm)<input type="text" id="mh" value="20"></label>
+      </div>
+      <div class="note" id="parNote"></div>
+      <label class="row sel">Randfarbe
+        <select id="bgc"><option value="0">Schwarz</option><option value="255">Weiß</option></select></label>
+      <label class="row">Zoom<input type="range" id="zoom" min="10" max="800" value="100"><output id="zoomO"></output></label>
+      <div class="note">Vorschau ziehen = verschieben, Mausrad = zoomen.</div>
+      <div class="btns"><button id="resetView">Ausschnitt zurücksetzen</button></div>
+    </div>
+    <div class="card">
+      <h2>Tonwerte</h2>
+      <label class="chk"><input type="checkbox" id="auto" checked> Auto-Kontrast (1 % / 99 %)</label>
+      <label class="row">Helligkeit<input type="range" id="bri" min="-100" max="100" value="0"><output></output></label>
+      <label class="row">Kontrast<input type="range" id="con" min="-100" max="100" value="0"><output></output></label>
+      <label class="row">Gamma<input type="range" id="gam" min="20" max="300" value="100"><output></output></label>
+      <label class="row">Schärfen<input type="range" id="shp" min="0" max="200" value="0"><output></output></label>
+    </div>
+    <div class="card">
+      <h2>Dithering</h2>
+      <label class="row sel">Verfahren
+        <select id="dith">
+          <option value="fs">Floyd-Steinberg</option>
+          <option value="atk" selected>Atkinson</option>
+          <option value="jjn">Jarvis-Judice-Ninke</option>
+          <option value="b4">Bayer 4×4 (geordnet)</option>
+          <option value="b8">Bayer 8×8 (geordnet)</option>
+          <option value="thr">Schwelle (kein Dithering)</option>
+        </select></label>
+      <label class="row">Schwelle<input type="range" id="thr" min="1" max="254" value="128"><output></output></label>
+      <label class="row">Fehlerstärke<input type="range" id="str" min="0" max="100" value="100"><output></output></label>
+      <label class="chk"><input type="checkbox" id="serp" checked> Serpentinen-Scan</label>
+    </div>
+    <div class="card">
+      <h2>Ausgabeformat</h2>
+      <label class="chk"><input type="checkbox" id="inv"> Negativ (Bits invertieren)</label>
+      <label class="chk"><input type="checkbox" id="lsb"> Bitfolge LSB = linkes Pixel</label>
+      <label class="chk"><input type="checkbox" id="flip"> Zeilen von unten nach oben</label>
+      <label class="row sel">Dateityp
+        <select id="ftype"><option value="2">PRG</option><option value="1">SEQ</option><option value="3">USR</option></select></label>
+      <label class="chk"><input type="checkbox" id="hdr"> 2-Byte-Ladeadresse voranstellen</label>
+      <label class="row sel">Adresse ($)<input type="text" id="addr" class="mono" value="0000" maxlength="4"></label>
+      <div class="note">Standard (wie HSGIMAGE): Rohdaten ohne Header, 64 Byte je Zeile, oberste Zeile zuerst, MSB = linkes Pixel, Bit 1 = Pixel an. Mit „Format übernehmen“ in der D64-Ansicht lassen sich Typ und Header einer vorhandenen Bilddatei übernehmen.</div>
+      <label class="row sel" style="margin-top:8px">Vorschau-Farbe
+        <select id="phos"><option value="#52ff6e">Grün (Phosphor)</option><option value="#ffb341">Bernstein</option><option value="#f2f2f2">Weiß</option></select></label>
+    </div>
+  </section>
+
+  <!-- ========== Vorschau ========== -->
+  <section id="center" class="card">
+    <div id="drop" tabindex="0">
+      <b>Bild hierher ziehen</b> (PNG, JPG, GIF, BMP, WebP …), einfügen mit Strg+V oder klicken.<br>
+      Eine <b>.d64</b>-Datei hier ablegen öffnet das Disk-Image.
+      <input type="file" id="file" accept="image/*,.d64" class="hidden" multiple>
+    </div>
+    <div class="viewhead">
+      <h3>Ergebnis · so wie die Datei auf dem CBM erscheint</h3>
+      <div>
+        <select id="scale" style="width:auto">
+          <option value="fit">Einpassen</option><option value="1">1×</option><option value="2">2×</option><option value="3">3×</option>
+        </select>
+      </div>
+    </div>
+    <div class="scr"><canvas id="out" width="512" height="256"></canvas></div>
+    <div class="stats" id="stats">Noch kein Bild geladen.</div>
+    <div class="viewhead"><h3>Quelle · skaliert auf <span class="resLabel">512 × 256</span> (vor dem Dithering)</h3></div>
+    <div class="scr"><canvas id="src" width="512" height="256"></canvas></div>
+    <div id="plView" class="hidden">
+      <div class="viewhead"><h3>Plot · Papiervorschau (0,3-mm-Stift)</h3></div>
+      <div class="paper"><canvas id="plcv" width="1" height="1"></canvas></div>
+      <div class="stats" id="plStats"></div>
+    </div>
+    <div id="t8View" class="hidden">
+      <div class="viewhead"><h3>Textgrafik für den CBM 8028 · Papiervorschau (Courier als Näherung)</h3></div>
+      <div class="paper"><canvas id="t8cv" width="1" height="1"></canvas></div>
+      <div class="stats" id="t8stats">Noch kein Bild geladen.</div>
+    </div>
+    <details><summary>Hexdump der Ausgabedatei (Anfang)</summary><pre class="hex" id="hex"></pre></details>
+  </section>
+
+  <!-- ========== D64 ========== -->
+  <section id="disk">
+    <div class="card" id="linkCard">
+      <h2>An CBM senden · HSG-Link</h2>
+      <div class="btns" style="margin-top:0">
+        <button class="primary" id="lkConnect">Verbinden …</button>
+        <button id="lkImage" disabled>Bild senden</button>
+        <button id="lkClear" disabled>Löschen</button>
+        <button id="lkQuit" disabled>Viewer beenden</button>
+      </div>
+      <label class="chk"><input type="checkbox" id="lkLive"> Live: Änderungen automatisch senden (nur der geänderte Ausschnitt)</label>
+      <progress id="lkProg" max="1" value="0" style="width:100%"></progress>
+      <div class="msg" id="lkMsg"></div>
+      <div class="note">Am CBM zuerst: <code>sys 40960</code>, dann <code>load "hsgmenu",8</code>, <code>run</code>, Taste <b>2</b> (mit Plotter) oder <code>load "hsgser",8</code>, <code>run</code>. Abbruch am CBM mit STOP. Braucht Chrome oder Edge am PC und den Pro Micro mit dem Sketch HSGLink.</div>
+    </div>
+    <div class="card">
+      <h2>In D64 schreiben</h2>
+      <label class="row sel">Dateiname<input type="text" id="fname" class="mono" maxlength="16" placeholder="BILD"></label>
+      <div class="btns">
+        <button class="primary" id="add" disabled>Zum D64 hinzufügen</button>
+        <button id="dlraw" disabled>Rohdatei laden (.bin)</button>
+      </div>
+      <div class="msg" id="msg"></div>
+    </div>
+    <div class="card hidden" id="plCard">
+      <h2>Plotter · HSGMENU</h2>
+      <label class="row sel">Vorschau
+        <select id="plMode">
+          <option value="hatch" selected>Schraffur (Taste S)</option>
+          <option value="kringel">Kringel (Taste K)</option>
+          <option value="points">Punkte (Taste P bzw. H)</option>
+        </select></label>
+      <div class="note">Den Modus wählt man am CBM per Taste, hier nur für die Vorschau.</div>
+      <div class="note" style="margin-top:8px"><b>Helligkeit der Schraffur:</b> ab wie vielen dunklen Punkten (von 16 je Fläche) eine Linienlage kommt. Kleiner = dunkler, 17 = Lage aus.</div>
+      <label class="row">Lage 1 —<input type="range" id="plT1" min="1" max="17" value="2"><output id="plT1O"></output></label>
+      <label class="row">Lage 2 |<input type="range" id="plT2" min="1" max="17" value="5"><output id="plT2O"></output></label>
+      <label class="row">Lage 3 /<input type="range" id="plT3" min="1" max="17" value="8"><output id="plT3O"></output></label>
+      <label class="row">Lage 4 \<input type="range" id="plT4" min="1" max="17" value="11"><output id="plT4O"></output></label>
+      <label class="chk"><input type="checkbox" id="plInv" checked> Papier wie Bildschirm (dunkle Stellen zeichnen)</label>
+      <label class="row">Maßstab<input type="range" id="plScl" min="4" max="20" value="14"><output></output></label>
+      <div class="note">Bildgröße auf dem Papier: <span id="plSize"></span> (1 Einheit = 0,025 mm je Bildpunkt).</div>
+      <label class="row">Lücken (Punkte-Modus)<input type="range" id="plGap" min="0" max="8" value="0"><output></output></label>
+      <label class="row sel">Stift-Nummer<input type="text" id="plPen" value="1"></label>
+      <label class="row sel">Plotter-Adresse<input type="text" id="plDev" value="5"></label>
+      <label class="row sel">Linker Rand<input type="text" id="plX0" value="1800"></label>
+      <label class="row sel">Unterer Rand<input type="text" id="plY0" value="250"></label>
+      <div class="btns">
+        <button class="primary" id="plAdd">HSGMENU mit diesen Werten ins D64</button>
+        <button id="plDl">hsgmenu.prg</button>
+        <button id="plReset">Vorgaben</button>
+      </div>
+      <div class="msg" id="plMsg"></div>
+      <div class="note">Die Werte stehen danach fest im Programm (Adressen 1043–1056), POKEs sind nicht nötig. Am CBM: <code>load "hsgmenu",8</code>, <code>run</code>, dann <b>1</b> = Bild von Diskette oder <b>2</b> = HSG-Link; Plot mit <b>S</b>, <b>K</b> oder <b>P</b>/<b>H</b>.</div>
+    </div>
+    <div class="card hidden" id="t8card">
+      <h2>Drucker CBM 8028</h2>
+      <label class="row sel">Breite
+        <select id="t8cols">
+          <option value="80@10" selected>80 Zeichen · 10/Zoll · 20 cm</option>
+          <option value="96@12">96 Zeichen · 12/Zoll · 20 cm</option>
+          <option value="132@10">132 Zeichen · 10/Zoll · 33,5 cm</option>
+          <option value="158@12">158 Zeichen · 12/Zoll · 33,5 cm</option>
+        </select></label>
+      <label class="row sel">Überdrucken
+        <select id="t8over">
+          <option value="cs" selected>2. Durchgang je Zeile (CS, $8D)</option>
+          <option value="bs">Rückschritt je Zeichen (BS, $08)</option>
+          <option value="off">aus (ein Zeichen je Stelle)</option>
+        </select></label>
+      <label class="row sel">Dateiname<input type="text" id="t8name" class="mono" maxlength="16" value="TEXTBILD"></label>
+      <div class="btns">
+        <button class="primary" id="t8add" disabled>Textgrafik ins D64 (SEQ)</button>
+        <button id="t8prg">Druckprogramm DRUCK8028</button>
+        <button id="t8test">Testseite 8028TEST</button>
+        <button id="t8txt" disabled>.txt laden</button>
+      </div>
+      <div class="msg" id="t8msg"></div>
+      <div class="note">Am CBM: <code>load "druck8028",8</code>, <code>run</code>, Dateiname eingeben. Zuerst die Testseite drucken: Sie zeigt, ob Überdrucken (CS oder BS) klappt und wie die Zeichen aussehen. Den Zeichenabstand (10 oder 12/Zoll) stellt die Datei selbst ein. Drucker auf Adresse 4 (Werkseinstellung), Schalter „PRINT ON“. Gedruckt werden die dunklen Stellen des Fotos; Tonwerte und Ausschnitt wie links eingestellt.</div>
+    </div>
+    <div class="card">
+      <h2>Disk-Image</h2>
+      <div class="dir" id="dir"></div>
+      <div class="btns">
+        <button id="openD64">D64 öffnen …</button>
+        <button id="newD64">Neues D64</button>
+        <button class="primary" id="saveD64">D64 herunterladen</button>
+      </div>
+      <div class="note" style="margin-top:10px">Viewer in neue D64 aufnehmen:</div>
+      <label class="chk"><input type="checkbox" id="withMenu" checked> HSGMENU – Menü: 1 Bild von Diskette (DIREKTPLOT), 2 HSG-Link; mit Plotter</label>
+      <label class="chk"><input type="checkbox" id="withViewer" checked> HSGIMAGE – Bilder von Diskette anzeigen</label>
+      <label class="chk"><input type="checkbox" id="withSer" checked> HSGSER – Bilder über HSG-Link empfangen</label>
+      <div class="btns">
+        <button id="addViewer">Gewählte Viewer ins D64</button>
+        <button id="dlViewer">hsgimage.prg</button>
+        <button id="dlSer">hsgser.prg</button>
+        <button id="dlMenu">hsgmenu.prg</button>
+      </div>
+      <div class="note" id="viewerInfo"></div>
+      <label class="row sel" style="margin-top:10px">Diskname<input type="text" id="dname" class="mono" maxlength="16" value="HSG BILDER"></label>
+      <label class="row sel">Disk-ID<input type="text" id="did" class="mono" maxlength="2" value="HS"></label>
+      <label class="row sel">Speichern als<input type="text" id="dfile" value="hsgimage.d64"></label>
+      <input type="file" id="d64file" accept=".d64" class="hidden">
+      <div class="note">Name und ID gelten für „Neues D64“. Zeile anklicken = Datei mit den aktuellen Formateinstellungen anzeigen.</div>
+    </div>
+    <div class="card hidden" id="peekCard">
+      <h2 id="peekTitle">Datei im D64</h2>
+      <div class="scr"><canvas id="peek" width="512" height="256"></canvas></div>
+      <div class="stats" id="peekStats"></div>
+      <div class="btns"><button id="adopt">Format übernehmen</button><button id="peekClose">Schließen</button></div>
+    </div>
+  </section>
+</main>
+
+<script>
+"use strict";
+const W = 512;
+let H = 256, RAW = W * H / 8; // EF9366: 256 Zeilen = 16384 Byte, EF9365: 512 Zeilen = 32768 Byte
+/* Unterschiede laut HSG-Handbuch, Abschnitt 2.3, und Datenblatt EF9365/66:
+   EF9365 (Version A): 512 × 512, interlaced, 25 Hz Bildwechsel (flimmert), eine Bildseite
+   EF9366 (Version B): 512 × 256, non-interlaced, 50 Hz, zwei Bildseiten (Befehl MODE)
+   Beide nutzen dieselbe Bildhöhe am Monitor: beim EF9365 ist jede Zeile halb so hoch.
+   HSGIMAGE erkennt den Chip selbst ($0371) und liest 256 bzw. 512 Zeilen à 64 Byte. */
+const CHIPS = {
+  "9366": { rows: 256, label: "EF9366", note: "Version B: 512 × 256, non-interlaced, 50 Hz, flimmerfrei, zwei Bildseiten. Bilddatei 16384 Byte = 65 Blöcke." },
+  "9365": { rows: 512, label: "EF9365", note: "Version A: 512 × 512, interlaced, nur 25 Hz pro Vollbild, flimmert ohne nachleuchtenden Monitor, eine Bildseite. Bilddatei 32768 Byte = 130 Blöcke. Zeilen sind halb so hoch, Pixel fast quadratisch." },
+};
+function setChip(c) {
+  const chip = CHIPS[c] || CHIPS["9366"];
+  if (H === chip.rows && outCv.height === H) return;
+  H = chip.rows; RAW = W * H / 8;
+  for (const cv of [outCv, srcCv]) cv.height = H;
+  view.oy = 0;
+}
+const $ = id => document.getElementById(id);
+
+/* ---------------------------------------------------------------- D64 */
+const D64_SIZE = 174848;
+const spt = t => t < 18 ? 21 : t < 25 ? 19 : t < 31 ? 18 : 17;
+const toff = [0, 0];
+for (let t = 2; t <= 36; t++) toff[t] = toff[t - 1] + spt(t - 1);
+const so = (t, s) => (toff[t] + s) * 256;
+const BAM = so(18, 0);
+const validTS = (t, s) => t >= 1 && t <= 35 && s >= 0 && s < spt(t);
+
+function petEncode(str, len) {
+  const out = [];
+  for (const ch of str.toUpperCase()) {
+    let c = ch.charCodeAt(0);
+    if (c < 0x20 || c > 0x5D || ',:*?="'.includes(ch)) c = 0x2D; // '-'
+    out.push(c);
+    if (out.length >= len) break;
+  }
+  return out;
+}
+function petDecode(bytes) {
+  let s = "";
+  for (const b of bytes) {
+    if (b === 0xA0) break;
+    if (b >= 0x20 && b <= 0x5D) s += String.fromCharCode(b);
+    else if (b >= 0xC1 && b <= 0xDA) s += String.fromCharCode(b - 0x80);
+    else s += "·";
+  }
+  return s;
+}
+
+class D64 {
+  constructor(bytes) { this.d = bytes; }
+  static blank(name, id) {
+    const d = new Uint8Array(D64_SIZE), disk = new D64(d);
+    d[BAM] = 18; d[BAM + 1] = 1; d[BAM + 2] = 0x41;
+    for (let t = 1; t <= 35; t++) {
+      const e = BAM + 4 * t, n = spt(t);
+      d[e] = n;
+      for (let s = 0; s < n; s++) d[e + 1 + (s >> 3)] |= 1 << (s & 7);
+    }
+    d.fill(0xA0, BAM + 0x90, BAM + 0xAB);
+    d.set(petEncode(name, 16), BAM + 0x90);
+    d.set(petEncode(id || "00", 2), BAM + 0xA2);
+    d[BAM + 0xA5] = 0x32; d[BAM + 0xA6] = 0x41; // "2A"
+    disk.alloc(18, 0); disk.alloc(18, 1);
+    d[so(18, 1) + 1] = 0xFF;
+    return disk;
+  }
+  isFree(t, s) { return (this.d[BAM + 4 * t + 1 + (s >> 3)] >> (s & 7)) & 1; }
+  alloc(t, s) {
+    if (!this.isFree(t, s)) throw new Error(`Sektor ${t}/${s} ist schon belegt`);
+    this.d[BAM + 4 * t + 1 + (s >> 3)] &= ~(1 << (s & 7));
+    this.d[BAM + 4 * t]--;
+  }
+  release(t, s) {
+    if (this.isFree(t, s)) return;
+    this.d[BAM + 4 * t + 1 + (s >> 3)] |= 1 << (s & 7);
+    this.d[BAM + 4 * t]++;
+  }
+  freeBlocks() { let n = 0; for (let t = 1; t <= 35; t++) if (t !== 18) n += this.d[BAM + 4 * t]; return n; }
+  get name() { return petDecode(this.d.subarray(BAM + 0x90, BAM + 0xA0)); }
+  get id() { return petDecode(this.d.subarray(BAM + 0xA2, BAM + 0xA4)) + " " + petDecode(this.d.subarray(BAM + 0xA5, BAM + 0xA7)); }
+  dirSectors() {
+    const out = [], seen = new Set();
+    let t = 18, s = 1;
+    while (t !== 0 && validTS(t, s) && !seen.has(t * 64 + s) && out.length < 40) {
+      seen.add(t * 64 + s); out.push([t, s]);
+      const o = so(t, s); t = this.d[o]; s = this.d[o + 1];
+    }
+    return out;
+  }
+  entries() {
+    const list = [];
+    for (const [t, s] of this.dirSectors())
+      for (let i = 0; i < 8; i++) {
+        const b = so(t, s) + i * 32, type = this.d[b + 2];
+        if (type === 0) continue;
+        list.push({ base: b, type, t: this.d[b + 3], s: this.d[b + 4],
+          nameBytes: this.d.slice(b + 5, b + 21), name: petDecode(this.d.subarray(b + 5, b + 21)),
+          blocks: this.d[b + 30] | (this.d[b + 31] << 8) });
+      }
+    return list;
+  }
+  chain(t, s) {
+    const secs = [], seen = new Set();
+    while (t !== 0) {
+      if (!validTS(t, s)) throw new Error(`Ungültiger Sektor ${t}/${s} in der Dateikette`);
+      if (seen.has(t * 64 + s)) throw new Error("Schleife in der Dateikette");
+      seen.add(t * 64 + s); secs.push([t, s]);
+      const o = so(t, s); [t, s] = [this.d[o], this.d[o + 1]];
+    }
+    return secs;
+  }
+  readFile(e) {
+    const parts = [];
+    for (const [t, s] of this.chain(e.t, e.s)) {
+      const o = so(t, s);
+      parts.push(this.d[o] === 0 ? this.d.slice(o + 2, o + Math.max(2, this.d[o + 1]) + 1) : this.d.slice(o + 2, o + 256));
+    }
+    const out = new Uint8Array(parts.reduce((a, p) => a + p.length, 0));
+    let p = 0; for (const x of parts) { out.set(x, p); p += x.length; }
+    return out;
+  }
+  remove(e) {
+    try { for (const [t, s] of this.chain(e.t, e.s)) this.release(t, s); } catch (_) { /* defekte Kette: nur Eintrag löschen */ }
+    this.d[e.base + 2] = 0;
+  }
+  findSlot() {
+    const secs = this.dirSectors();
+    for (const [t, s] of secs)
+      for (let i = 0; i < 8; i++) { const b = so(t, s) + i * 32; if (this.d[b + 2] === 0) return b; }
+    const [lt, ls] = secs[secs.length - 1];
+    for (let k = 0; k < 19; k++) {
+      const s = (ls + 3 + k) % 19;
+      if (s !== 0 && this.isFree(18, s)) {
+        this.alloc(18, s);
+        const o = so(18, s); this.d.fill(0, o, o + 256); this.d[o + 1] = 0xFF;
+        this.d[so(lt, ls)] = 18; this.d[so(lt, ls) + 1] = s;
+        return o;
+      }
+    }
+    throw new Error("Verzeichnis ist voll (144 Einträge)");
+  }
+  allocData(n) {
+    const order = [];
+    for (let t = 17; t >= 1; t--) order.push(t);
+    for (let t = 19; t <= 35; t++) order.push(t);
+    const res = []; let ti = 0, s = 0;
+    while (res.length < n) {
+      if (ti >= order.length) throw new Error("Disk voll");
+      const t = order[ti], N = spt(t);
+      if (this.d[BAM + 4 * t] === 0) { ti++; s = 0; continue; }
+      let f = -1;
+      for (let k = 0; k < N; k++) { const c = (s + k) % N; if (this.isFree(t, c)) { f = c; break; } }
+      this.alloc(t, f); res.push([t, f]); s = (f + 10) % N; // Interleave 10 wie 1541-DOS
+    }
+    return res;
+  }
+  writeFile(nameBytes, data, ftype) {
+    const blocks = Math.max(1, Math.ceil(data.length / 254));
+    if (blocks > this.freeBlocks()) throw new Error(`Nicht genug Platz: ${blocks} Blöcke nötig, ${this.freeBlocks()} frei`);
+    const slot = this.findSlot();
+    const secs = this.allocData(blocks);
+    secs.forEach(([t, s], i) => {
+      const o = so(t, s), chunk = data.subarray(i * 254, i * 254 + 254);
+      this.d.fill(0, o, o + 256);
+      if (i < secs.length - 1) { this.d[o] = secs[i + 1][0]; this.d[o + 1] = secs[i + 1][1]; }
+      else { this.d[o] = 0; this.d[o + 1] = chunk.length + 1; }
+      this.d.set(chunk, o + 2);
+    });
+    this.d[slot + 2] = 0x80 | ftype;
+    this.d[slot + 3] = secs[0][0]; this.d[slot + 4] = secs[0][1];
+    this.d.fill(0xA0, slot + 5, slot + 21); this.d.set(nameBytes, slot + 5);
+    this.d.fill(0, slot + 21, slot + 30);
+    this.d[slot + 30] = blocks & 255; this.d[slot + 31] = blocks >> 8;
+    return blocks;
+  }
+}
+
+/* ---------------------------------------------------------------- Viewer
+   HSGIMAGE: eingebettet aus hsgimage.d64 (PRG, 417 Byte, Ladeadresse $0401, SHA-1 f08fce76…).
+     Liest die Datei über Sekundäradresse $60 Byte für Byte, MSB zuerst, setzt bei Bit 1
+     einen Punkt und beginnt oben links (Y = 255 bzw. 511 abwärts).
+   HSGSER: aus serial/hsgser.asm (PRG, 780 Byte, $0401), empfängt über den Userport
+     vom Pro Micro (HSG-Link). Rahmenformat siehe hsgser.asm. */
+const HSGIMAGE_B64 = "AQQNBAoAnjEwNDAAAADq6uogdAWgMSADBakAhdqpAoXbqQiF1KIAIM//yQ3wBp0AAujQ84bRqQ0g0v+l0dABYKkAhZapYIXTIKX0pdQg0vCl0yCT8SDA8aqllkpKsEWQFSDh//Apqf0lloWWIMDxqqWWSkqw66AIGIoqqpADIK4EIMYEiNDxpZZKSiSWUNIgrvGl1CDV8KXTKe8J4CBD8SC58WAgpvKgACADBUwQBKkDjXGvqQCNcq+pFY1wryD5BKkCjXGvYO55r615r/ABYO54r614r8kCkPWpAI15r414rzite6/pAY17r616r+kAjXqvsNpoaEyOBEitcK8pBPD5aGC5EQUIKX8g0v/IKBDzYA1GSUxFIE5PVCBGT1VORCBFUlJPUiAtIFBMRUFTRSBSRS1FTlRFUiBGSUxFTkFNRY0NEkhTRyBJTUFHRSBMT0FERVIgLSBKVUxZIDIwMjQNDQ1FTlRFUiBGSUxFTkFNRSA/oCDQriD5BK1xA0kBjXqvqf+Ne6+pAI15r6kAjXivqQCNda+pAI13r2AAAAAA";
+const HSGSER_B64 = "AQQNBAoAnjEwNDAAAADq6uq6jlQHqQCNVQcgywUg0K4gRwagACCZBiAgBiDwBY1WB6kAjVcHrVYHyUnQA0xcBMlQ0ANMjgTJQ9ADTMgEyVHQA0zYBKCDIJkGTCcEIOMFjV4HIOMFjV8HIEcGqQCNWgeNWweNXAeNWQepQI1dByDlBCA2BrAFoGIgmQZMJwQg4wWNWgcg4wWNWwcg4wWNXAcg4wWNXQcg4wWNXgcg4wWNXwepAY1ZB61dB9ADTCcEIOUEIDYGTCcEIDYGsAggRwagliCZBkwnBCA2BrD4oKAgmQZMjAap/zjtWweNYAetWAftXAeNYQetXgeNYgetXweNYwetYgcNYwfQBqkCjXGvYK1aB41kB6kAjWUHDmQHLmUHDmQHLmUHDmQHLmUHIHkGrWUHjXivrWQHjXmvrWEHKQ+Neq+tYAeNe6+tXQeNZgetWgeNZwcg4wWNaAepAI1pB61hBzAKrWcHyUCwA+5pB6IIDmgHkASpA9AHrVkH8BKpAaxpB/ALjXGvqRWNcK8geQbuea/QA+54r8rQ1e5nB85mB9CxOK1gB+kBjWAHrWEH6QCNYQc4rWIH6QGNYgetYwfpAI1jB0wDBakCjU7oqQCNQ+itTOgpHgnAjUzorUHoYCDwBUgYbVcHjVcHaGCtTegpAtAbIOH/0ANMgwYg5P/w7MlE8ATJINDkIGgGTPAFrUHoSK1M6EkgjUzoaGAg8AXJSND5IPAFyVPQ9SDwBclH0O5gIPAFzVcH8AegcSCZBjhgGGAgeQapBI1wryB5Bq1xA0kBKQGNWAepAI11r413r41yr2CtVQdJAY1VByB5Bq5VB0zcrkitcK8pBPD5aGCuVAeaoKUgmQapAo1xr6kAjVUHTHAGuacGCCl/INL/yCgQ82ANEkhTR1NFUiAtIEhTRy1MSU5LIEVNUEZBRU5HRVINV0FSVEUgQVVGIERBVEVOLCBTVE9QID0gRU5ERQ1EL0xFRVIgPSBHUkFGSUsgQVVGIENCTS1TQ0hJUk0gQU4vQVVTjUJJTEQgRU1QRkFOR0VOjVBSVUVGU1VNTUVORkVITEVSjVVOQkVLQU5OVEVSIEJFRkVITI1HRUxPRVNDSFSNRU5ERY1BQkJSVUNIjQAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+// Reihenfolge = Reihenfolge im neuen D64 (erster Eintrag lädt auch mit LOAD"*",8)
+const HSGMENU_B64 = "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";
+const VIEWERS = {
+  HSGMENU:  { b64: HSGMENU_B64,  data: null, base: null, src: "eingebettet (cbm/hsgmenu.prg), mit den Plotter-Einstellungen", box: "withMenu", file: "hsgmenu.prg", key: "hsg.viewer.HSGMENU" },
+  HSGIMAGE: { b64: HSGIMAGE_B64, data: null, src: "eingebettet (hsgimage.d64, Juli 2024)", box: "withViewer", file: "hsgimage.prg", key: "hsg.viewer" },
+  HSGSER:   { b64: HSGSER_B64,   data: null, src: "eingebettet (serial/hsgser.asm)",       box: "withSer",    file: "hsgser.prg",   key: "hsg.viewer.HSGSER" },
+};
+
+function findViewer(dk, name) { return dk.entries().find(e => e.name === name && (e.type & 7) === 2); }
+function updateViewerInfo() {
+  const parts = [];
+  let missing = 0;
+  for (const [name, v] of Object.entries(VIEWERS)) {
+    const has = disk && findViewer(disk, name), old = has && viewerOutdated(disk, has, name);
+    if ((!has || old) && $(v.box).checked) missing++;
+    parts.push(`${name}: ${v.data.length} Byte, ${v.src}, im D64 ${!has ? "nicht vorhanden" : old ? "in älterer Version (wird beim Hinzufügen ersetzt)" : "vorhanden"}.`);
+  }
+  $("viewerInfo").textContent = parts.join(" ") +
+    ` Alle erkennen EF9365/EF9366 selbst. Am CBM: sys 40960, dann load "hsgmenu",8 (oder "hsgimage" bzw. "hsgser") und run.`;
+  $("addViewer").disabled = missing === 0;
+}
+function viewerOutdated(dk, e, name) {
+  try { const d = dk.readFile(e), v = VIEWERS[name].data; return d.length !== v.length || d.some((b, i) => b !== v[i]); } catch (_) { return true; }
+}
+function addViewerTo(dk, name) {
+  const e = findViewer(dk, name);
+  if (e && !viewerOutdated(dk, e, name)) return false;
+  if (e) dk.remove(e);                                   // ältere Version ersetzen
+  dk.writeFile(petEncode(name, 16), VIEWERS[name].data, 2);
+  return true;
+}
+// Neues D64 mit den gewählten Viewern als ersten Einträgen
+function blankDisk() {
+  const dk = D64.blank($("dname").value || "HSG BILDER", $("did").value || "HS");
+  for (const [name, v] of Object.entries(VIEWERS)) if ($(v.box).checked) addViewerTo(dk, name);
+  return dk;
+}
+
+/* ---------------------------------------------------------------- Zustand */
+let img = null, imgName = "", disk = null, packed = null, selEntry = null;
+const view = { ox: 0, oy: 0 };
+const ctl = id => $(id);
+const S = () => ({
+  fit: ctl("fit").value, par: parValue(), bg: +ctl("bgc").value, zoom: +ctl("zoom").value / 100,
+  auto: ctl("auto").checked, bri: +ctl("bri").value, con: +ctl("con").value, gam: +ctl("gam").value / 100, shp: +ctl("shp").value / 100,
+  dith: ctl("dith").value, thr: +ctl("thr").value / 255, str: +ctl("str").value / 100, serp: ctl("serp").checked,
+  inv: ctl("inv").checked, lsb: ctl("lsb").checked, flip: ctl("flip").checked,
+  ftype: +ctl("ftype").value, hdr: ctl("hdr").checked, addr: parseInt(ctl("addr").value, 16) || 0,
+  phos: ctl("phos").value,
+});
+
+/* Pixel-Seitenverhältnis (Breite/Höhe eines Pixels auf dem Schirm).
+   Datenblatt EF9365/66, „Detailed line diagram“: Zeile = 112 T, sichtbar (BLK) = 64 T, T = 570 ns
+   → 512 Pixel in 36,5 µs von ca. 52 µs sichtbarer Zeilenzeit; 256 von ca. 287 sichtbaren Zeilen.
+   Auf einem 4:3-Schirm: Breite 4·0,70 = 2,81, Höhe 3·0,89 = 2,67 → Bild ≈ 1,05 : 1, Pixel ≈ 0,525 : 1. */
+function parValue() {
+  const v = ctl("par").value;
+  if (v !== "custom") return +v * H / 256; // Vorgabewerte gelten für 256 Zeilen, beim EF9365 halbe Zeilenhöhe
+  const w = parseFloat(ctl("mw").value.replace(",", ".")), h = parseFloat(ctl("mh").value.replace(",", "."));
+  return w > 0 && h > 0 ? (w / W) / (h / H) : 0.525;
+}
+
+/* ---------------------------------------------------------------- Bildpipeline */
+const srcCv = $("src"), srcCx = srcCv.getContext("2d", { willReadFrequently: true });
+const outCv = $("out"), outCx = outCv.getContext("2d");
+
+function drawSource(st) {
+  srcCx.fillStyle = `rgb(${st.bg},${st.bg},${st.bg})`;
+  srcCx.fillRect(0, 0, W, H);
+  if (!img) return;
+  const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+  let dw, dh;
+  if (st.fit === "stretch") { dw = W * st.zoom; dh = H * st.zoom; }
+  else {
+    const a = W * st.par / iw, b = H / ih;
+    const sc = (st.fit === "contain" ? Math.min(a, b) : Math.max(a, b)) * st.zoom;
+    dw = iw * sc / st.par; dh = ih * sc;
+  }
+  const dx = (W - dw) / 2 + view.ox, dy = (H - dh) / 2 + view.oy;
+  srcCx.imageSmoothingEnabled = true; srcCx.imageSmoothingQuality = "high";
+  // Schrittweises Verkleinern gegen Aliasing bei großen Bildern
+  let source = img, sw = iw, sh = ih;
+  while (sw > dw * 2 && sh > dh * 2) {
+    const c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round(sw / 2)); c.height = Math.max(1, Math.round(sh / 2));
+    const x = c.getContext("2d"); x.imageSmoothingQuality = "high"; x.drawImage(source, 0, 0, c.width, c.height);
+    source = c; sw = c.width; sh = c.height;
+  }
+  srcCx.drawImage(source, dx, dy, dw, dh);
+}
+
+function grayFromSource(st) {
+  const px = srcCx.getImageData(0, 0, W, H).data, g = new Float32Array(W * H);
+  for (let i = 0; i < W * H; i++) g[i] = (0.299 * px[i * 4] + 0.587 * px[i * 4 + 1] + 0.114 * px[i * 4 + 2]) / 255;
+  if (st.auto) {
+    const hist = new Uint32Array(256);
+    for (const v of g) hist[Math.min(255, v * 255 | 0)]++;
+    let lo = 0, hi = 255, acc = 0;
+    for (; lo < 255; lo++) { acc += hist[lo]; if (acc > g.length * 0.01) break; }
+    acc = 0;
+    for (; hi > 0; hi--) { acc += hist[hi]; if (acc > g.length * 0.01) break; }
+    if (hi > lo) { const a = lo / 255, r = (hi - lo) / 255; for (let i = 0; i < g.length; i++) g[i] = (g[i] - a) / r; }
+  }
+  if (st.shp > 0) {
+    const c = Float32Array.from(g);
+    for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+      const i = y * W + x, blur = (c[i - 1] + c[i + 1] + c[i - W] + c[i + W]) / 4;
+      g[i] = c[i] + (c[i] - blur) * st.shp * 2;
+    }
+  }
+  const cf = st.con >= 0 ? 1 + st.con / 25 : 1 + st.con / 100, b = st.bri / 100;
+  for (let i = 0; i < g.length; i++) {
+    let v = (g[i] - 0.5) * cf + 0.5 + b;
+    v = v < 0 ? 0 : v > 1 ? 1 : v;
+    g[i] = Math.pow(v, 1 / st.gam);
+  }
+  return g;
+}
+
+const KERNELS = {
+  fs: [[1, 0, 7], [-1, 1, 3], [0, 1, 5], [1, 1, 1]].map(k => [k[0], k[1], k[2] / 16]),
+  atk: [[1, 0], [2, 0], [-1, 1], [0, 1], [1, 1], [0, 2]].map(k => [k[0], k[1], 1 / 8]),
+  jjn: [[1,0,7],[2,0,5],[-2,1,3],[-1,1,5],[0,1,7],[1,1,5],[2,1,3],[-2,2,1],[-1,2,3],[0,2,5],[1,2,3],[2,2,1]].map(k => [k[0], k[1], k[2] / 48]),
+};
+function bayer(n) {
+  let m = [[0]];
+  while (m.length < n) {
+    const s = m.length, r = [];
+    for (let y = 0; y < s * 2; y++) { r[y] = []; for (let x = 0; x < s * 2; x++) r[y][x] = 4 * m[y % s][x % s] + [0, 2, 3, 1][(y >= s) * 2 + (x >= s)]; }
+    m = r;
+  }
+  return m;
+}
+function dither(g, st) {
+  const bits = new Uint8Array(W * H);
+  if (st.dith === "thr") { for (let i = 0; i < g.length; i++) bits[i] = g[i] >= st.thr ? 1 : 0; return bits; }
+  if (st.dith === "b4" || st.dith === "b8") {
+    const n = st.dith === "b4" ? 4 : 8, m = bayer(n), sh = st.thr - 0.5;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++)
+      bits[y * W + x] = g[y * W + x] > (m[y % n][x % n] + 0.5) / (n * n) + sh ? 1 : 0;
+    return bits;
+  }
+  const e = Float32Array.from(g), K = KERNELS[st.dith];
+  for (let y = 0; y < H; y++) {
+    const rev = st.serp && (y & 1);
+    for (let k = 0; k < W; k++) {
+      const x = rev ? W - 1 - k : k, i = y * W + x, v = e[i], o = v >= st.thr ? 1 : 0;
+      bits[i] = o;
+      const err = (v - o) * st.str;
+      for (const [dx0, dy, w] of K) {
+        const dx = rev ? -dx0 : dx0, nx = x + dx, ny = y + dy;
+        if (nx >= 0 && nx < W && ny < H) e[ny * W + nx] += err * w;
+      }
+    }
+  }
+  return bits;
+}
+
+// Bits (1 = hell) → Dateibytes
+function pack(bits, st) {
+  const raw = new Uint8Array(RAW);
+  for (let y = 0; y < H; y++) {
+    const sy = st.flip ? H - 1 - y : y;
+    for (let xb = 0; xb < 64; xb++) {
+      let b = 0;
+      for (let k = 0; k < 8; k++) if (bits[sy * W + xb * 8 + k] ^ st.inv) b |= st.lsb ? 1 << k : 0x80 >> k;
+      raw[y * 64 + xb] = b;
+    }
+  }
+  if (!st.hdr) return raw;
+  const f = new Uint8Array(RAW + 2); f[0] = st.addr & 255; f[1] = st.addr >> 8; f.set(raw, 2); return f;
+}
+// Dateibytes → Bildschirmpixel (1 = Pixel an). Gleiche Einstellungen wie beim Schreiben,
+// die Vorschau zeigt also exakt den Dateiinhalt.
+function unpack(bytes, st, skip, rows) {
+  rows = rows || H;
+  const bits = new Uint8Array(W * rows);
+  for (let y = 0; y < rows; y++) {
+    const sy = st.flip ? rows - 1 - y : y;
+    for (let xb = 0; xb < 64; xb++) {
+      const b = bytes[skip + y * 64 + xb] || 0;
+      for (let k = 0; k < 8; k++) bits[sy * W + xb * 8 + k] = (st.lsb ? b >> k : b >> (7 - k)) & 1;
+    }
+  }
+  return bits;
+}
+function paint(ctx, bits, color) {
+  const id = ctx.createImageData(ctx.canvas.width, ctx.canvas.height), d = id.data, n = ctx.canvas.width * ctx.canvas.height;
+  const r = parseInt(color.slice(1, 3), 16), g = parseInt(color.slice(3, 5), 16), b = parseInt(color.slice(5, 7), 16);
+  for (let i = 0; i < n; i++) {
+    const on = bits[i];
+    d[i * 4] = on ? r : 5; d[i * 4 + 1] = on ? g : 8; d[i * 4 + 2] = on ? b : 5; d[i * 4 + 3] = 255;
+  }
+  ctx.putImageData(id, 0, 0);
+}
+
+function hexdump(bytes, n) {
+  const lines = [];
+  for (let o = 0; o < Math.min(n, bytes.length); o += 16) {
+    const row = Array.from(bytes.subarray(o, o + 16));
+    lines.push(o.toString(16).padStart(4, "0") + "  " + row.map(b => b.toString(16).padStart(2, "0")).join(" "));
+  }
+  return lines.join("\n");
+}
+
+function applyCanvasSize() {
+  const st = S(), mode = $("scale").value;
+  for (const cv of [outCv, srcCv, $("peek")]) {
+    cv.style.aspectRatio = `${W * st.par} / ${H}`;
+    if (mode === "fit" || cv.id === "peek") {
+      cv.classList.remove("fixed"); cv.style.height = "";
+      cv.style.width = `min(100%, calc(${cv.id === "peek" ? 40 : 68}vh * ${(W * st.par / H).toFixed(4)}))`;
+    }
+    else { cv.classList.add("fixed"); cv.style.width = W * st.par * mode + "px"; cv.style.height = H * mode + "px"; }
+  }
+}
+
+/* Neuberechnung planen. Bewusst setTimeout statt requestAnimationFrame: rAF läuft in
+   verdeckten/inaktiven Fenstern nicht, dann blieben Optionsänderungen ohne Wirkung.
+   Mehrere Änderungen kurz hintereinander werden zu einem Durchlauf zusammengefasst. */
+let pending = false;
+function render() {
+  if (pending) return; pending = true;
+  setTimeout(() => {
+    pending = false;
+    try { renderNow(); }
+    catch (err) { console.error(err); setMsg("Fehler bei der Berechnung: " + err.message, "err"); }
+  }, 0);
+}
+function renderNow() {
+  {
+    applyTarget();
+    setChip(ctl("chip").value);
+    const st = S(), chip = CHIPS[ctl("chip").value] || CHIPS["9366"];
+    applyCanvasSize();
+    $("chipNote").textContent = chip.note;
+    $("subtitle").textContent = `Bild → 512 × ${H} · 1 Bit · ${RAW} Byte → D64 (für HSG / ${chip.label} am CBM)`;
+    document.querySelectorAll(".resLabel").forEach(e => e.textContent = `512 × ${H}`);
+    document.querySelectorAll("label.row output").forEach(o => { const i = o.parentElement.querySelector("input"); if (i) o.textContent = i.value; });
+    $("zoomO").textContent = ctl("zoom").value + "%";
+    $("addr").disabled = !st.hdr;
+    $("measure").classList.toggle("hidden", ctl("par").value !== "custom");
+    $("parNote").textContent = `Bild auf dem Schirm ${(W * st.par / H).toFixed(2).replace(".", ",")} : 1, ein Pixel ist ${(1 / st.par).toFixed(2).replace(".", ",")}× so hoch wie breit.` +
+      (ctl("par").value === "custom" ? " Gemessen wird der sichtbare Grafikbereich am CBM-Monitor." : "");
+    drawSource(st);
+    // Vorschau einer D64-Datei hängt von Chip, Bitfolge, Zeilenrichtung und Farbe ab – auch ohne geladenes Bild
+    if (selEntry) showPeek(selEntry);
+    saveSettings();
+    if (!img) {
+      paint(outCx, new Uint8Array(W * H), st.phos); packed = null;
+      $("stats").textContent = "Noch kein Bild geladen."; $("hex").textContent = "";
+      t8Render(null, st); plRender(null);
+      updateButtons(); lkButtons(); return;
+    }
+    const gray = grayFromSource(st), bits = dither(gray, st);
+    packed = pack(bits, st);
+    const shown = unpack(packed, st, st.hdr ? 2 : 0);
+    paint(outCx, shown, st.phos);
+    let on = 0; for (const b of shown) on += b;
+    const blocks = Math.ceil(packed.length / 254);
+    $("stats").textContent = `${imgName} · Original ${img.naturalWidth || img.width}×${img.naturalHeight || img.height} → 512×${H} (${chip.label}) · ` +
+      `${(on / (W * H) * 100).toFixed(1)} % Pixel an · Datei ${packed.length} Byte = ${blocks} Blöcke`;
+    $("hex").textContent = hexdump(packed, 256);
+    t8Render($("target").value === "print" ? gray : null, st);
+    plRender(shown);
+    updateButtons();
+    lkButtons();
+    lkScheduleLive();
+  }
+}
+
+/* ---------------------------------------------------------------- Disk-UI */
+const TYPES = ["DEL", "SEQ", "PRG", "USR", "REL"];
+function renderDir() {
+  const el = $("dir"); el.innerHTML = "";
+  if (!disk) return;
+  const hd = document.createElement("div");
+  hd.innerHTML = `0 <span class="hd">"${disk.name.padEnd(16)}" ${disk.id}</span>`;
+  el.appendChild(hd);
+  const tb = document.createElement("table");
+  for (const e of disk.entries()) {
+    const tr = document.createElement("tr"); tr.className = "f";
+    if (selEntry && selEntry.base === e.base) tr.classList.add("sel");
+    const typ = TYPES[e.type & 7] || "???";
+    const q = `"${e.name}"`;
+    tr.innerHTML = `<td>${String(e.blocks).padEnd(4)}</td><td>${q.padEnd(18)}${(e.type & 0x80) ? " " : "*"}${typ}${(e.type & 0x40) ? "<" : ""}</td><td class="act"><button title="Datei löschen">löschen</button></td>`;
+    tr.onclick = ev => {
+      if (ev.target.tagName === "BUTTON") {
+        if (confirm(`"${e.name}" aus dem D64 löschen?`)) { disk.remove(e); if (selEntry && selEntry.base === e.base) closePeek(); diskChanged(); }
+        return;
+      }
+      selEntry = e; showPeek(e); renderDir();
+    };
+    tb.appendChild(tr);
+  }
+  el.appendChild(tb);
+  const ft = document.createElement("div"); ft.textContent = `${disk.freeBlocks()} BLOCKS FREE.`;
+  el.appendChild(ft);
+}
+function showPeek(e) {
+  const st = S();
+  let data;
+  try { data = disk.readFile(e); } catch (err) { setMsg(err.message, "err"); return; }
+  // Zeilenzahl aus der Dateigröße: 16384 Byte = EF9366 (256 Zeilen), 32768 Byte = EF9365 (512 Zeilen)
+  const sizes = { 16384: [256, 0], 16386: [256, 2], 32768: [512, 0], 32770: [512, 2] };
+  const known = sizes[data.length], rows = known ? known[0] : H, skip = known ? known[1] : 0;
+  const pc = $("peek"); pc.height = rows;
+  paint(pc.getContext("2d"), unpack(data, st, skip, rows), st.phos);
+  $("peekCard").classList.remove("hidden");
+  $("peekTitle").textContent = `Datei im D64: "${e.name}"`;
+  let info = `${TYPES[e.type & 7]} · ${data.length} Byte · ${e.blocks} Blöcke`;
+  if (known) info += ` · 512 × ${rows} = ${rows === 512 ? "EF9365" : "EF9366"}`;
+  if (skip) info += ` · 2-Byte-Header erkannt ($${(data[0] | data[1] << 8).toString(16).padStart(4, "0").toUpperCase()}), übersprungen`;
+  if (!known) info += ` · Achtung: weder 16384 noch 32768 Byte, wahrscheinlich kein HSG-Bild`;
+  else if (rows !== H) info += ` · passt nicht zum gewählten Chip`;
+  $("peekStats").textContent = info;
+  $("peekCard").dataset.len = data.length;
+  $("peekCard").dataset.addr = skip ? (data[0] | data[1] << 8) : "";
+}
+function closePeek() { selEntry = null; $("peekCard").classList.add("hidden"); renderDir(); }
+$("peekClose").onclick = closePeek;
+$("adopt").onclick = () => {
+  if (!selEntry) return;
+  ctl("ftype").value = String(selEntry.type & 7 || 2);
+  const a = $("peekCard").dataset.addr;
+  ctl("hdr").checked = a !== "";
+  if (a !== "") ctl("addr").value = (+a).toString(16).padStart(4, "0").toUpperCase();
+  setMsg(`Format von "${selEntry.name}" übernommen: ${TYPES[selEntry.type & 7]}, ${a !== "" ? "mit" : "ohne"} Ladeadresse.`, "ok");
+  render();
+};
+
+function diskChanged() {
+  renderDir(); updateButtons(); updateViewerInfo();
+  try { localStorage.setItem("hsg.d64", b64(disk.d)); localStorage.setItem("hsg.d64name", $("dfile").value); } catch (_) {}
+}
+function setMsg(t, cls) { const m = $("msg"); m.textContent = t; m.className = "msg " + (cls || ""); }
+function updateButtons() { $("add").disabled = !packed || !disk; $("dlraw").disabled = !packed; if (typeof t8Buttons === "function") t8Buttons(); }
+
+$("add").onclick = () => {
+  if (!packed || !disk) return;
+  const raw = $("fname").value.trim();
+  if (!raw) { setMsg("Bitte einen Dateinamen eingeben.", "err"); $("fname").focus(); return; }
+  const nb = petEncode(raw, 16), name = petDecode(nb);
+  const ex = disk.entries().find(e => petDecode(e.nameBytes) === name);
+  if (ex) {
+    if (!confirm(`"${name}" existiert schon im D64. Überschreiben?`)) return;
+    if (selEntry && selEntry.base === ex.base) closePeek();
+    disk.remove(ex);
+  }
+  try {
+    const st = S(), blocks = disk.writeFile(nb, packed, st.ftype);
+    setMsg(`"${name}" geschrieben: ${packed.length} Byte, ${blocks} Blöcke, ${TYPES[st.ftype]}.`, "ok");
+    diskChanged();
+    const e = disk.entries().find(x => petDecode(x.nameBytes) === name);
+    if (e) { selEntry = e; showPeek(e); renderDir(); }
+  } catch (err) { setMsg(err.message, "err"); }
+};
+
+function download(bytes, name) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([bytes], { type: "application/octet-stream" }));
+  a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+$("saveD64").onclick = () => { if (disk) download(disk.d, $("dfile").value || "hsgimage.d64"); };
+$("dlraw").onclick = () => { if (packed) download(packed, (petDecode(petEncode($("fname").value || "BILD", 16)) || "BILD").toLowerCase() + ".bin"); };
+$("newD64").onclick = () => {
+  if (disk && disk.entries().length && !confirm("Aktuelles D64 verwerfen und ein leeres anlegen?")) return;
+  disk = blankDisk();
+  $("dfile").value = "hsgbilder.d64"; closePeek(); diskChanged();
+  const names = Object.keys(VIEWERS).filter(n => $(VIEWERS[n].box).checked);
+  setMsg(names.length ? `Neues D64 mit ${names.join(" und ")} angelegt.` : "Leeres D64 angelegt.", "ok");
+};
+$("addViewer").onclick = () => {
+  try {
+    const added = Object.keys(VIEWERS).filter(n => $(VIEWERS[n].box).checked && addViewerTo(disk, n));
+    if (added.length) { diskChanged(); setMsg(`${added.join(" und ")} ins D64 kopiert.`, "ok"); }
+  } catch (err) { setMsg(err.message, "err"); }
+};
+$("dlViewer").onclick = () => download(VIEWERS.HSGIMAGE.data, "hsgimage.prg");
+$("dlSer").onclick = () => download(VIEWERS.HSGSER.data, "hsgser.prg");
+$("openD64").onclick = () => $("d64file").click();
+$("d64file").onchange = e => { if (e.target.files[0]) loadD64(e.target.files[0]); e.target.value = ""; };
+
+async function loadD64(file) {
+  let d = new Uint8Array(await file.arrayBuffer());
+  if (d.length === 175531) d = d.slice(0, D64_SIZE); // mit Fehlerbytes
+  if (d.length !== D64_SIZE) { setMsg(`${file.name}: ${d.length} Byte. Erwartet wird ein 35-Spur-D64 (174848 Byte).`, "err"); return; }
+  disk = new D64(d); $("dfile").value = file.name; selEntry = null;
+  let note = "";
+  // Viewer aus dem geöffneten D64 übernehmen, falls dort welche liegen
+  for (const [name, vw] of Object.entries(VIEWERS)) {
+    if (name !== "HSGIMAGE") continue;                   // eigene Programme: immer die eingebettete Version
+    const ve = findViewer(disk, name);
+    if (!ve) continue;
+    try {
+      const v = disk.readFile(ve);
+      if (v.length > 2 && v.length < 8192 && v[0] === 0x01 && v[1] === 0x04) {
+        const changed = v.length !== vw.data.length || v.some((b, i) => b !== vw.data[i]);
+        vw.data = v; vw.src = file.name;
+        try { localStorage.setItem(vw.key, b64(v)); localStorage.setItem(vw.key + "Src", file.name); localStorage.setItem(vw.key + "Base", vw.b64); } catch (_) {}
+        note += changed ? ` ${name} daraus übernommen (neue Version).` : ` ${name} erkannt (identisch).`;
+      }
+    } catch (_) {}
+  }
+  closePeek(); diskChanged();
+  setMsg(`${file.name} geöffnet: ${disk.entries().length} Dateien, ${disk.freeBlocks()} Blöcke frei.${note}`, "ok");
+}
+
+/* ---------------------------------------------------------------- Bild laden */
+function loadImage(file) {
+  const url = URL.createObjectURL(file), im = new Image();
+  im.onload = () => {
+    img = im; imgName = file.name || "Zwischenablage";
+    view.ox = view.oy = 0; ctl("zoom").value = 100;
+    const base = (file.name || "BILD").replace(/\.[^.]*$/, "");
+    $("fname").value = petDecode(petEncode(base, 16));
+    setMsg("");
+    render();
+  };
+  im.onerror = () => setMsg(`${file.name}: Dieses Bildformat kann der Browser nicht lesen.`, "err");
+  im.src = url;
+}
+function handleFiles(files) {
+  const list = Array.from(files);
+  const d64 = list.find(f => /\.d64$/i.test(f.name) || f.size === D64_SIZE || f.size === 175531);
+  const pic = list.find(f => f !== d64 && (f.type.startsWith("image/") || /\.(bmp|png|jpe?g|gif|webp|avif|svg)$/i.test(f.name)));
+  if (d64) loadD64(d64);
+  if (pic) loadImage(pic);
+  if (!d64 && !pic) setMsg("Weder Bild noch D64 erkannt.", "err");
+}
+const drop = $("drop");
+drop.onclick = () => $("file").click();
+drop.onkeydown = e => { if (e.key === "Enter" || e.key === " ") $("file").click(); };
+$("file").onchange = e => { handleFiles(e.target.files); e.target.value = ""; };
+let dragDepth = 0;
+window.addEventListener("dragenter", e => { e.preventDefault(); dragDepth++; document.body.classList.add("dragging"); });
+window.addEventListener("dragleave", () => { if (--dragDepth <= 0) { dragDepth = 0; document.body.classList.remove("dragging"); } });
+window.addEventListener("dragover", e => e.preventDefault());
+window.addEventListener("drop", e => {
+  e.preventDefault(); dragDepth = 0; document.body.classList.remove("dragging");
+  if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+});
+window.addEventListener("paste", e => {
+  for (const it of e.clipboardData.items) if (it.type.startsWith("image/")) { loadImage(it.getAsFile()); break; }
+});
+
+/* ---------------------------------------------------------------- Verschieben / Zoomen */
+for (const cv of [outCv, srcCv]) {
+  let drag = null;
+  cv.addEventListener("pointerdown", e => { drag = { x: e.clientX, y: e.clientY }; cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener("pointermove", e => {
+    if (!drag) return;
+    const r = cv.getBoundingClientRect();
+    view.ox += (e.clientX - drag.x) * W / r.width; view.oy += (e.clientY - drag.y) * H / r.height;
+    drag = { x: e.clientX, y: e.clientY }; render();
+  });
+  cv.addEventListener("pointerup", () => drag = null);
+  cv.addEventListener("pointercancel", () => drag = null);
+  cv.addEventListener("wheel", e => {
+    if (!img) return;
+    e.preventDefault();
+    const z = Math.min(800, Math.max(10, Math.round(+ctl("zoom").value * Math.exp(-e.deltaY * 0.0015))));
+    const f = z / +ctl("zoom").value; view.ox *= f; view.oy *= f;
+    ctl("zoom").value = z; render();
+  }, { passive: false });
+}
+$("resetView").onclick = () => { view.ox = view.oy = 0; ctl("zoom").value = 100; render(); };
+
+/* ---------------------------------------------------------------- HSG-Link (Web Serial → Pro Micro → Userport)
+   Rahmen: "HSG" <Befehl> <Kopf> <Daten> <Prüfsumme über Kopf+Daten>, ausgewertet von HSGSER.
+   Der Pro Micro meldet „N <anzahl>“ = an den CBM übergebene Bytes; daran erkennt die Seite,
+   wann ein Rahmen wirklich beim CBM angekommen ist. */
+const LK = { port: null, writer: null, reader: null, busy: false, last: null, lastRows: 0,
+             written: 0, dev: 0, error: false, frameStart: 0, frameLen: 0, liveTimer: null, livePending: false };
+const le16 = v => [v & 0xFF, (v >> 8) & 0xFF];
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function buildFrame(cmd, header, payload) {
+  const len = header.length + (payload ? payload.length : 0);
+  const f = new Uint8Array(4 + len + 1);
+  f.set([0x48, 0x53, 0x47, cmd.charCodeAt(0)], 0); f.set(header, 4); if (payload) f.set(payload, 4 + header.length);
+  let s = 0; for (let i = 4; i < 4 + len; i++) s = (s + f[i]) & 0xFF;
+  f[4 + len] = s;
+  return f;
+}
+function lkMsg(t, cls) { const m = $("lkMsg"); m.textContent = t; m.className = "msg " + (cls || ""); }
+function lkButtons() {
+  const on = !!LK.port;
+  $("lkConnect").textContent = on ? "Trennen" : "Verbinden …";
+  $("lkConnect").disabled = LK.busy;
+  $("lkImage").disabled = !on || LK.busy || !packed;
+  $("lkClear").disabled = $("lkQuit").disabled = !on || LK.busy;
+}
+function lkProgress() {
+  $("lkProg").value = LK.busy && LK.frameLen ? Math.max(0, Math.min(1, (LK.dev - LK.frameStart) / LK.frameLen)) : (LK.error ? 0 : $("lkProg").value);
+}
+function rawImage() { return packed ? packed.subarray(packed.length - RAW) : null; } // ohne Ladeadresse
+
+async function lkConnect() {
+  if (LK.port) return lkDisconnect();
+  if (!("serial" in navigator)) {
+    lkMsg("Web Serial fehlt: Bitte Chrome oder Edge am PC verwenden" + (window.isSecureContext ? "." : " und die Seite über localhost oder https öffnen."), "err");
+    return;
+  }
+  try {
+    const port = await navigator.serial.requestPort();
+    await port.open({ baudRate: 115200 });
+    try { await port.setSignals({ dataTerminalReady: true, requestToSend: true }); } catch (_) {}
+    Object.assign(LK, { port, writer: port.writable.getWriter(), written: 0, dev: 0, last: null, error: false });
+    lkMsg("Verbunden. Warte auf Meldung vom HSG-Link …");
+    lkRead();
+    setTimeout(() => { if (LK.port === port && !LK.hello) lkMsg("Port offen, aber keine Meldung „HSGLINK“. Ist der Sketch HSGLink aufgespielt?", "warn"); }, 2500);
+  } catch (e) {
+    if (e.name !== "NotFoundError") lkMsg("Verbinden fehlgeschlagen: " + e.message, "err");
+  }
+  lkButtons();
+}
+async function lkDisconnect() {
+  const p = LK.port; LK.port = null; LK.hello = false;
+  try { if (LK.reader) await LK.reader.cancel(); } catch (_) {}
+  try { LK.writer.releaseLock(); } catch (_) {}
+  try { await p.close(); } catch (_) {}
+  lkMsg("Getrennt."); lkButtons();
+}
+async function lkRead() {
+  const dec = new TextDecoder(); let buf = "";
+  try {
+    LK.reader = LK.port.readable.getReader();
+    for (;;) {
+      const { value, done } = await LK.reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let i;
+      while ((i = buf.indexOf("\n")) >= 0) { const line = buf.slice(0, i).trim(); buf = buf.slice(i + 1); if (line) lkLine(line); }
+    }
+  } catch (e) { if (LK.port) { lkMsg("Verbindung unterbrochen: " + e.message, "err"); LK.error = true; } }
+  finally { try { LK.reader.releaseLock(); } catch (_) {} LK.reader = null; }
+}
+function lkLine(l) {
+  if (l.startsWith("HSGLINK")) { LK.hello = true; LK.dev = 0; LK.written = 0; lkMsg(`${l} bereit. HSGSER am CBM starten, dann „Bild senden“.`, "ok"); }
+  else if (l.startsWith("N ")) { LK.dev = parseInt(l.slice(2), 10) || LK.dev; lkProgress(); }
+  else if (l.startsWith("E TIMEOUT")) {
+    LK.error = true; LK.dev = parseInt(l.split(" ")[2], 10) || LK.dev;
+    lkMsg("Der CBM quittiert nicht. Läuft HSGSER (sys 40960, load \"hsgser\",8, run)? Kabel prüfen.", "err");
+  }
+  else if (l === "R") { LK.written = LK.dev; }
+}
+navigator.serial && navigator.serial.addEventListener("disconnect", e => { if (e.target === LK.port) { LK.port = null; LK.busy = false; lkMsg("HSG-Link abgezogen.", "err"); lkButtons(); } });
+
+async function lkSend(cmd, header, payload, label) {
+  if (!LK.port || LK.busy) return false;
+  const fr = buildFrame(cmd, header, payload);
+  Object.assign(LK, { busy: true, error: false, frameStart: LK.written, frameLen: fr.length });
+  lkButtons(); lkProgress(); lkMsg(`${label}: sende ${fr.length} Byte …`);
+  const t0 = performance.now();
+  try {
+    for (let i = 0; i < fr.length && !LK.error; i += 256) {
+      const chunk = fr.subarray(i, i + 256);
+      await LK.writer.write(chunk);
+      LK.written += chunk.length;
+    }
+    // warten, bis der Pro Micro alles an den CBM übergeben hat
+    let lastDev = LK.dev, lastChange = performance.now();
+    while (!LK.error && LK.port && LK.dev < LK.frameStart + fr.length) {
+      await sleep(40);
+      if (LK.dev !== lastDev) { lastDev = LK.dev; lastChange = performance.now(); }
+      else if (performance.now() - lastChange > 8000) { LK.error = true; lkMsg("Keine Rückmeldung vom HSG-Link.", "err"); }
+      const s = (performance.now() - t0) / 1000, done = Math.max(0, LK.dev - LK.frameStart);
+      if (!LK.error) lkMsg(`${label}: ${done} / ${fr.length} Byte · ${s.toFixed(1)} s`);
+    }
+  } catch (e) { LK.error = true; lkMsg("Senden fehlgeschlagen: " + e.message, "err"); }
+  LK.busy = false; lkProgress(); lkButtons();
+  if (!LK.error) { $("lkProg").value = 1; lkMsg(`${label} übertragen: ${fr.length} Byte in ${((performance.now() - t0) / 1000).toFixed(1)} s.`, "ok"); }
+  if (LK.livePending) { LK.livePending = false; lkScheduleLive(); }
+  return !LK.error;
+}
+async function lkSendImage() {
+  const raw = rawImage(); if (!raw) return;
+  const copy = raw.slice(), rows = H;
+  if (await lkSend("I", le16(rows), copy, `Bild 512×${rows}`)) { LK.last = copy; LK.lastRows = rows; }
+  else LK.last = null;
+}
+$("lkConnect").onclick = lkConnect;
+$("lkImage").onclick = lkSendImage;
+$("lkClear").onclick = async () => { if (await lkSend("C", [], null, "Löschen")) { LK.last = new Uint8Array(RAW); LK.lastRows = H; } };
+$("lkQuit").onclick = async () => { await lkSend("Q", [], null, "Viewer beenden"); LK.last = null; };
+
+// Live: nur das Rechteck mit Änderungen schicken (P), bei großen Änderungen das ganze Bild (I)
+function lkScheduleLive() {
+  if (!LK.port || !$("lkLive").checked || !packed) return;
+  clearTimeout(LK.liveTimer);
+  LK.liveTimer = setTimeout(lkLive, 350);
+}
+async function lkLive() {
+  if (!LK.port || !$("lkLive").checked) return;
+  if (LK.busy) { LK.livePending = true; return; }
+  const raw = rawImage(); if (!raw) return;
+  if (!LK.last || LK.lastRows !== H || LK.last.length !== raw.length) return lkSendImage();
+  let x0 = 64, x1 = -1, y0 = H, y1 = -1;
+  for (let y = 0; y < H; y++) for (let x = 0; x < 64; x++)
+    if (raw[y * 64 + x] !== LK.last[y * 64 + x]) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  if (x1 < 0) return;                                        // nichts geändert
+  const w = x1 - x0 + 1, h = y1 - y0 + 1;
+  if (w * h * 2 > RAW) return lkSendImage();                 // P zeichnet jedes Bit, I nur gesetzte
+  const copy = raw.slice(), payload = new Uint8Array(w * h);
+  for (let y = 0; y < h; y++) payload.set(copy.subarray((y0 + y) * 64 + x0, (y0 + y) * 64 + x0 + w), y * w);
+  if (await lkSend("P", [x0, ...le16(y0), w, ...le16(h)], payload, `Ausschnitt ${w * 8}×${h}`)) LK.last = copy;
+  else LK.last = null;
+}
+$("lkLive").addEventListener("change", () => { if ($("lkLive").checked) lkScheduleLive(); });
+
+/* ---------------------------------------------------------------- HP-GL-Referenzen (cbm/hsgplot/hpgl-sim.js) */
+/* ==== BEGIN hpgl-sim (Kopie von cbm/hpgl-sim.js, aktualisieren mit: node tools/update-html.js) ==== */
+const HP = (function () { const module = { exports: {} };
+// Gemeinsame Test-Hilfen für HSGPLOT, DIREKTPLOT und die Website-Vorschau:
+// HP-GL zurück ins Raster rechnen, Stiftbewegung messen, Testbilder erzeugen.
+"use strict";
+
+const parseHPGL = s => s.split(";").filter(x => x.length).map(c => ({ op: c.slice(0, 2), args: c.slice(2).length ? c.slice(2).split(",").map(Number) : [] }));
+
+// Plotter nachspielen. Erlaubte Striche: waagerecht in einer Plotterzeile oder senkrecht genau eine Zeile weit.
+// Liefert Raster (512×512, Zeile 0 = oben), Fehler und Kennzahlen zur Stiftbewegung.
+function rasterFromHPGL(cmds, cfg) {
+  const r = new Uint8Array(512 * 512), errors = [];
+  const m = { lowers: 0, upTravel: 0, downTravel: 0 };            // Stift senken, Leerfahrt, Zeichenweg (Plotter-Einheiten)
+  let x = 0, y = 0, down = false;
+  const px = (X, Y) => {
+    const c = (X - cfg.x0) / cfg.s, pr = (Y - cfg.y0) / cfg.s;
+    if (!Number.isInteger(c) || !Number.isInteger(pr) || c < 0 || c > 511 || pr < 0 || pr > 511) { errors.push(`Koordinate daneben ${X},${Y}`); return null; }
+    return [c, pr];
+  };
+  const mark = (c, pr) => { r[(511 - pr) * 512 + c] = 1; };
+  for (const c of cmds) {
+    if (c.op === "PU") {
+      down = false;
+      for (let i = 0; i + 1 < c.args.length; i += 2) { m.upTravel += Math.hypot(c.args[i] - x, c.args[i + 1] - y); x = c.args[i]; y = c.args[i + 1]; }
+    } else if (c.op === "PD") {
+      if (!down) { m.lowers++; down = true; const p = px(x, y); if (p) mark(...p); }
+      for (let i = 0; i + 1 < c.args.length; i += 2) {
+        const x2 = c.args[i], y2 = c.args[i + 1], a = px(x, y), b = px(x2, y2);
+        m.downTravel += Math.hypot(x2 - x, y2 - y);
+        if (a && b) {
+          if (a[1] === b[1]) for (let k = Math.min(a[0], b[0]); k <= Math.max(a[0], b[0]); k++) mark(k, a[1]);
+          else if (a[0] === b[0] && Math.abs(a[1] - b[1]) === 1) { mark(...a); mark(...b); }
+          else errors.push(`Strich schräg oder zu lang ${x},${y} -> ${x2},${y2}`);
+        }
+        x = x2; y = y2;
+      }
+    } else if (c.op === "IN") { down = false; }
+    else if (c.op !== "SP") errors.push("Unbekannter Befehl " + c.op);
+  }
+  return { r, errors, m };
+}
+
+// Erwartetes Plotter-Raster aus dem Bildschirm (256 Zeilen: jede doppelt), optional Lücken bis gap Punkte gefüllt
+function expected(fb, rows, inv, gap = 0) {
+  const e = new Uint8Array(512 * 512);
+  for (let pr = 0; pr < 512; pr++) {
+    const row = rows === 512 ? 511 - pr : 255 - (pr >> 1), o = (511 - pr) * 512;
+    for (let x = 0; x < 512; x++) e[o + x] = fb[row * 512 + x] ^ (inv ? 1 : 0);
+    if (gap > 0) {
+      let last = -1;
+      for (let x = 0; x < 512; x++) if (e[o + x]) { if (last >= 0 && x - last - 1 <= gap) for (let k = last + 1; k < x; k++) e[o + k] = 1; last = x; }
+    }
+  }
+  return e;
+}
+const diffCount = (a, b) => { let n = 0; for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) n++; return n; };
+
+function rnd(seed) { let s = seed >>> 0; return () => (s = (s * 1664525 + 1013904223) >>> 0) >>> 24; }
+const pack = (px, rows) => { const d = new Uint8Array(rows * 64); for (let i = 0; i < px.length; i++) if (px[i]) d[i >> 3] |= 0x80 >> (i & 7); return d; };
+
+// "Foto": weicher Verlauf mit hellen und dunklen Flecken, Atkinson-Dithering wie die Konverter-Vorgabe
+function photoImage(rows) {
+  const g = new Float32Array(512 * rows);
+  for (let y = 0; y < rows; y++) for (let x = 0; x < 512; x++) {
+    const v = y * (512 / rows);
+    const a = 0.5 + 0.35 * Math.sin(x / 70) * Math.cos(v / 90) + 0.25 * Math.exp(-((x - 300) ** 2 + (v - 200) ** 2) / 6000) - 0.3 * Math.exp(-((x - 120) ** 2 + (v - 380) ** 2) / 9000);
+    g[y * 512 + x] = Math.max(0, Math.min(1, a)) * 255;
+  }
+  const px = new Uint8Array(512 * rows);
+  for (let y = 0; y < rows; y++) for (let x = 0; x < 512; x++) {
+    const i = y * 512 + x, old = g[i], nw = old >= 128 ? 255 : 0, err = (old - nw) / 8;
+    px[i] = nw ? 1 : 0;
+    for (const [dx, dy] of [[1, 0], [2, 0], [-1, 1], [0, 1], [1, 1], [0, 2]]) {
+      const xx = x + dx, yy = y + dy; if (xx >= 0 && xx < 512 && yy < rows) g[yy * 512 + xx] += err;
+    }
+  }
+  return pack(px, rows);
+}
+// Strichzeichnung: Rahmen, Kreis, Diagonalen, gefüllte Scheibe
+function lineArt(rows) {
+  const px = new Uint8Array(512 * rows);
+  for (let y = 0; y < rows; y++) for (let x = 0; x < 512; x++) {
+    const v = y * (512 / rows), d = Math.hypot(x - 256, v - 256), d2 = Math.hypot(x - 380, v - 120);
+    if (y < 2 || y >= rows - 2 || x < 2 || x >= 510 || (d > 196 && d < 202) || Math.abs(x - v) < 1.5 || Math.abs(x + v - 511) < 1.5 || d2 < 60) px[y * 512 + x] = 1;
+  }
+  return pack(px, rows);
+}
+// Dichtes Testbild (wie bisher): Rahmen, Ring, Block, ~2 % Streupunkte
+function testImage(rows, seed) {
+  const r = rnd(seed), px = new Uint8Array(512 * rows);
+  for (let y = 0; y < rows; y++) for (let x = 0; x < 512; x++) {
+    const cx = x - 256, cy = (y - rows / 2) * (512 / rows), d = Math.sqrt(cx * cx + cy * cy);
+    if (y === 0 || y === rows - 1 || x === 0 || x === 511 || (d > 150 && d < 160) || (x > 500 && y < 20) || r() < 6) px[y * 512 + x] = 1;
+  }
+  return pack(px, rows);
+}
+// Referenz für den Kringel-Modus (muss Byte für Byte der 6502-Ausgabe entsprechen).
+// P = Plotter-Raster aus expected(); cfg = { s, x0, y0, pen }; stopAfterBands = Abbruch nach n Bändern
+function kringelRef(P, cfg) {
+  const S = cfg.s, CW = 4 * S, offs = k => Array.from({ length: k }, (_, i) => Math.floor((i + 1) * CW / k));
+  let out = `IN;SP${cfg.pen || 1};`, dir = 0, pdown = false, side = 0;
+  for (let br = 508; br >= 0; br -= 4) {
+    let any = false;
+    for (let pr = br; pr < br + 4; pr++) for (let x = 0; x < 512; x++) if (P[(511 - pr) * 512 + x]) any = true;
+    if (!any) { pdown = false; continue; }
+    const ylo = cfg.y0 + br * S, yhi = ylo + 3 * S, y = () => (side ? yhi : ylo);
+    for (let i = 0; i < 128; i++) {
+      const c = dir ? 127 - i : i;
+      let cnt = 0; for (let pr = br; pr < br + 4; pr++) for (let x = 4 * c; x < 4 * c + 4; x++) cnt += P[(511 - pr) * 512 + x];
+      const k = cnt >> 1;                                       // 0..8 Zacken
+      if (!k) { pdown = false; continue; }
+      const xb = cfg.x0 + (dir ? 4 * (c + 1) : 4 * c) * S;
+      if (!pdown) { out += `PU${xb},${y()};`; pdown = true; }
+      out += "PD" + offs(k).map(o => { side ^= 1; return `${dir ? xb - o : xb + o},${y()}`; }).join(",") + ";";
+    }
+    dir ^= 1;
+  }
+  return out + "PU;SP0;";
+}
+// Referenz für den Schraffur-Modus (muss Byte für Byte der 6502-Ausgabe entsprechen).
+// Zellen 4×4 Punkte (128 × 128), Stufe = Anzahl der Schwellen th[0..3], die die Punktzahl erreicht.
+// Ebene 1 waagerecht (wird schon beim Einlesen Band für Band gezeichnet), 2 senkrecht, 3 "/", 4 "\".
+// Koordinaten in Punkten: Zelle (m, c) = x 4c..4c+4, y 4m..4m+4 (m = 0 unten); Plotter = X0/Y0 + Punkte * S.
+function hatchRef(P, cfg, th = [2, 5, 8, 11]) {
+  const S = cfg.s, L = Array.from({ length: 128 }, () => new Uint8Array(128));
+  let out = `IN;SP${cfg.pen || 1};`, dir = 0;
+  const X = p => cfg.x0 + p * S, Y = p => cfg.y0 + p * S;
+  // eine Linie: Start (m, c), Schritt (dm, dc), n Zellen, Ein-/Austrittspunkt relativ zur Zellecke (Punkte)
+  const line = (t, m, c, dm, dc, n, en, ex) => {
+    if (dir) { m += (n - 1) * dm; c += (n - 1) * dc; dm = -dm; dc = -dc; [en, ex] = [ex, en]; }
+    let run = null, any = false;
+    const emit = () => { out += `PU${X(run[0])},${Y(run[1])};PD${X(run[2])},${Y(run[3])};`; run = null; any = true; };
+    for (let i = 0; i < n; i++, m += dm, c += dc) {
+      if (L[m][c] >= t) {
+        if (!run) run = [4 * c + en[0], 4 * m + en[1]];
+        run[2] = 4 * c + ex[0]; run[3] = 4 * m + ex[1];
+      } else if (run) emit();
+    }
+    if (run) emit();
+    if (any) dir ^= 1;
+  };
+  for (let m = 127; m >= 0; m--) {                               // Einlesen + Ebene 1
+    for (let c = 0; c < 128; c++) {
+      let cnt = 0;
+      for (let pr = 4 * m; pr < 4 * m + 4; pr++) for (let x = 4 * c; x < 4 * c + 4; x++) cnt += P[(511 - pr) * 512 + x];
+      L[m][c] = th.filter(v => cnt >= v).length;
+    }
+    line(1, m, 0, 0, 1, 128, [0, 2], [4, 2]);
+  }
+  for (let c = 0; c < 128; c++) line(2, 127, c, -1, 0, 128, [2, 4], [2, 0]);
+  for (let s = 0; s < 255; s++) {                                // "/" von links oben nach rechts unten
+    const m = s < 127 ? 127 - s : 0, c = s < 127 ? 0 : s - 127;
+    line(3, m, c, 1, 1, 128 - Math.abs(s - 127), [0, 0], [4, 4]);
+  }
+  for (let s = 254; s >= 0; s--) {                               // "\" von rechts oben nach links unten
+    const m = s >= 127 ? 127 : s, c = s >= 127 ? s - 127 : 0;
+    line(4, m, c, -1, 1, Math.min(s, 254 - s) + 1, [0, 4], [4, 0]);
+  }
+  return out + "PU;SP0;";
+}
+// HP-GL als SVG zeichnen (Vorschau), Plotter-Einheiten, Y nach oben
+function hpglToSVG(s, title = "") {
+  let x = 0, y = 0, path = "", lifts = 0;
+  for (const c of parseHPGL(s)) {
+    if (c.op === "PU") { for (let i = 0; i + 1 < c.args.length; i += 2) { x = c.args[i]; y = c.args[i + 1]; } }
+    else if (c.op === "PD") { path += `M${x} ${-y}`; lifts++; for (let i = 0; i + 1 < c.args.length; i += 2) { x = c.args[i]; y = c.args[i + 1]; path += `L${x} ${-y}`; } }
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="1700 -7550 7400 7400" width="900" height="900"><title>${title}</title>` +
+    `<rect x="1700" y="-7550" width="7400" height="7400" fill="#fff"/><path d="${path}" fill="none" stroke="#123" stroke-width="12" stroke-linejoin="round"/></svg>`;
+}
+const fmt = m => `${m.lowers} × Stift senken, Leerfahrt ${(m.upTravel * 0.025 / 1000).toFixed(1)} m, Zeichenweg ${(m.downTravel * 0.025 / 1000).toFixed(1)} m`;
+
+// Kennzahlen für beliebige Striche (auch schräg, Kringel-Modus)
+function penStats(s) {
+  const m = { lowers: 0, upTravel: 0, downTravel: 0 }; let x = 0, y = 0, down = false;
+  for (const c of parseHPGL(s)) {
+    if (c.op === "PU") { down = false; for (let i = 0; i + 1 < c.args.length; i += 2) { m.upTravel += Math.hypot(c.args[i] - x, c.args[i + 1] - y); x = c.args[i]; y = c.args[i + 1]; } }
+    else if (c.op === "PD") { if (!down) { m.lowers++; down = true; } for (let i = 0; i + 1 < c.args.length; i += 2) { m.downTravel += Math.hypot(c.args[i] - x, c.args[i + 1] - y); x = c.args[i]; y = c.args[i + 1]; } }
+  }
+  return m;
+}
+
+if (typeof module !== "undefined") module.exports = { parseHPGL, rasterFromHPGL, expected, diffCount, rnd, photoImage, lineArt, testImage, fmt, kringelRef, hatchRef, hpglToSVG, penStats };
+
+return module.exports; })();
+/* ==== END hpgl-sim ==== */
+/* ==== BEGIN 8028 ==== */
+/* ---------------------------------------------------------------- Typenraddrucker CBM 8028 (Textgrafik)
+   Das Bild wird in Zeichenzellen geteilt (10 oder 12 Zeichen/Zoll, 6 Zeilen/Zoll). Je Zelle wird das Zeichen
+   gewählt, dessen Form (2 × 3 Teilfelder) am besten zur Tinte im Bild passt; der Helligkeitsfehler geht an die
+   Nachbarzellen (Floyd-Steinberg). Optional zweites Zeichen auf dieselbe Stelle (Überdrucken).
+   Gedruckt werden die dunklen Stellen des Bildes (Papier wie Foto), unabhängig von „Negativ“.
+   Codes laut Bedienungshandbuch CBM 8028 (Abschnitte 8.3 und 9.1, Typenrad RUSTIKA): der Drucker liest PETSCII,
+   $41–$5A = a–z, $C1–$DA = A–Z; $40 = §, $5B–$5E = Leerzeichen, $3C/$3E Sonderzeichen (nicht verwendet).
+   CR ($0D) druckt die Zeile mit Zeilenvorschub, CS ($8D) ohne (Überdrucken), BS ($08) = nächstes Zeichen auf dieselbe Stelle,
+   $04 / $84 = 10 / 12 Zeichen pro Zoll. */
+const T8_CHARS = (() => {
+  const a = [];
+  for (let c = 0x21; c <= 0x3B; c++) a.push(c);                  // ! " # $ % & ' ( ) * + , - . / 0–9 : ;
+  a.push(0x3D, 0x3F);                                             // = ?
+  for (let c = 0x41; c <= 0x5A; c++) a.push(c);                  // a–z
+  for (let c = 0xC1; c <= 0xDA; c++) a.push(c);                  // A–Z
+  return a;
+})();
+const t8Disp = c => String.fromCharCode(c >= 0xC1 && c <= 0xDA ? c - 0x80 : c >= 0x41 && c <= 0x5A ? c + 0x20 : c);   // Code → Zeichen auf dem Papier
+const T8_SX = 2, T8_SY = 3, T8_CPS = 30;   // Formraster je Zelle; Druckleistung laut Service-Manual (Mittel 30 Zeichen/s)
+const T8 = { gkey: "", G: null, res: null, bytes: null, opts: null };
+
+function t8Opts() {
+  const [cols, cpi] = $("t8cols").value.split("@").map(Number);
+  return { cols, cpi, over: $("t8over").value };
+}
+// Zeichenformen messen (Bildschirmschrift Courier als Näherung für das Typenrad)
+function t8Glyphs(cpi) {
+  if (T8.gkey === String(cpi)) return T8.G;
+  const cw = cpi === 12 ? 20 : 24, ch = 40;          // 240 dpi: 1/10" bzw. 1/12" breit, 1/6" hoch
+  const cv = document.createElement("canvas"); cv.width = cw; cv.height = ch;
+  const cx = cv.getContext("2d", { willReadFrequently: true });
+  const n = cw * ch;
+  const mask = code => {
+    cx.fillStyle = "#000"; cx.fillRect(0, 0, cw, ch);
+    if (code !== 0x20) {
+      cx.fillStyle = "#fff"; cx.font = `${Math.round(cw / 0.6)}px "Courier New", Courier, monospace`;
+      cx.textBaseline = "alphabetic"; cx.fillText(t8Disp(code), 0, Math.round(ch * 0.78));
+    }
+    const d = cx.getImageData(0, 0, cw, ch).data, m = new Float32Array(n);
+    for (let i = 0; i < n; i++) m[i] = d[i * 4] / 255;
+    return m;
+  };
+  const feat = m => {
+    const f = new Float32Array(T8_SX * T8_SY);
+    for (let y = 0; y < ch; y++) for (let x = 0; x < cw; x++) f[Math.min(T8_SY - 1, (y * T8_SY / ch) | 0) * T8_SX + Math.min(T8_SX - 1, (x * T8_SX / cw) | 0)] += m[y * cw + x];
+    for (let i = 0; i < f.length; i++) f[i] /= n / f.length;
+    return f;
+  };
+  const M = new Map([[0x20, mask(0x20)], ...T8_CHARS.map(c => [c, mask(c)])]);
+  const mk = codes => { const f = feat(codes.length === 1 ? M.get(codes[0]) : M.get(codes[0]).map((v, i) => Math.max(v, M.get(codes[1])[i]))); return { codes, f, mean: f.reduce((a, b) => a + b, 0) / f.length }; };
+  const single = [mk([0x20]), ...T8_CHARS.map(c => mk([c]))];
+  const good = single.filter(s => s.mean > 0.06).map(s => s.codes[0]);
+  const pairs = [];
+  for (let i = 0; i < good.length; i++) for (let j = i + 1; j < good.length; j++) pairs.push(mk([good[i], good[j]]));
+  T8.gkey = String(cpi); T8.G = { single, all: single.concat(pairs), cw, ch };
+  return T8.G;
+}
+// g = Helligkeit 0..1 (W × H, nach den Tonwert-Reglern), Ergebnis: Zeilen aus Zellen [code] oder [code1, code2]
+function t8Convert(g, st, o) {
+  const G = t8Glyphs(o.cpi), cand = o.over === "off" ? G.single : G.all;
+  const cellAsp = G.cw / G.ch, imgAsp = W * st.par / H;
+  const cols = o.cols, lines = Math.max(1, Math.round(cols * cellAsp / imgAsp));
+  let fmax = 0; for (const c of cand) fmax = Math.max(fmax, c.mean);
+  const CW2 = cols + 2, err = new Float32Array((lines + 1) * CW2), t = new Float32Array(T8_SX * T8_SY);
+  const out = [];
+  for (let r = 0; r < lines; r++) {
+    const row = [], y0 = r * H / lines, y1 = (r + 1) * H / lines;
+    for (let c = 0; c < cols; c++) {
+      const x0 = c * W / cols, x1 = (c + 1) * W / cols;
+      for (let j = 0; j < T8_SY; j++) for (let i = 0; i < T8_SX; i++) {
+        const ya = Math.floor(y0 + (y1 - y0) * j / T8_SY), yb = Math.min(H, Math.max(ya + 1, Math.floor(y0 + (y1 - y0) * (j + 1) / T8_SY)));
+        const xa = Math.floor(x0 + (x1 - x0) * i / T8_SX), xb = Math.min(W, Math.max(xa + 1, Math.floor(x0 + (x1 - x0) * (i + 1) / T8_SX)));
+        let s = 0, k = 0;
+        for (let y = ya; y < yb; y++) for (let x = xa; x < xb; x++) { s += 1 - g[y * W + x]; k++; }
+        t[j * T8_SX + i] = (k ? s / k : 0) * fmax + err[r * CW2 + c + 1];
+      }
+      let best = 0, bd = Infinity;
+      for (let k = 0; k < cand.length; k++) {
+        const f = cand[k].f; let d = 0;
+        for (let q = 0; q < t.length; q++) { const e = f[q] - t[q]; d += e * e; }
+        if (d < bd) { bd = d; best = k; }
+      }
+      const p = cand[best]; let e = 0;
+      for (let q = 0; q < t.length; q++) e += t[q] - p.f[q];
+      e /= t.length;
+      err[r * CW2 + c + 2] += e * 7 / 16; err[(r + 1) * CW2 + c] += e * 3 / 16; err[(r + 1) * CW2 + c + 1] += e * 5 / 16; err[(r + 1) * CW2 + c + 2] += e / 16;
+      row.push(p.codes);
+    }
+    out.push(row);
+  }
+  return { out, cols, lines, cw: G.cw, ch: G.ch };
+}
+// Bytes an den Drucker: Zeichenabstand ($04/$84), je Zeile Durchgang 1, bei Überdrucken CS ($8D) + Durchgang 2
+// (oder BS nach jedem Zeichen), dann CR (druckt die Zeile, Zeilenvorschub)
+function t8Bytes(res, o) {
+  const b = [o.cpi === 12 ? 0x84 : 0x04];
+  const trim = a => { let n = a.length; while (n && a[n - 1] === 0x20) n--; return a.slice(0, n); };
+  for (const row of res.out) {
+    if (o.over === "bs") {
+      let n = row.length; while (n && row[n - 1].length === 1 && row[n - 1][0] === 0x20) n--;
+      for (let i = 0; i < n; i++) { b.push(row[i][0]); if (row[i].length > 1) b.push(8, row[i][1]); }
+    } else {
+      b.push(...trim(row.map(c => c[0])));
+      if (o.over === "cs" && row.some(c => c.length > 1)) { b.push(0x8D); b.push(...trim(row.map(c => c.length > 1 ? c[1] : 0x20))); }
+    }
+    b.push(13);
+  }
+  return Uint8Array.from(b);
+}
+function t8Strikes(res) { let n = 0; for (const row of res.out) for (const c of row) n += c.filter(x => x !== 0x20).length; return n; }
+
+// Papiervorschau: halbe Simulationsauflösung (120 dpi)
+function t8Paint(res) {
+  const cv = $("t8cv"), s = 0.5, cw = res.cw * s, ch = res.ch * s;
+  cv.width = Math.round(res.cols * cw); cv.height = Math.round(res.lines * ch);
+  const cx = cv.getContext("2d");
+  cx.fillStyle = "#fff"; cx.fillRect(0, 0, cv.width, cv.height);
+  cx.fillStyle = "#111"; cx.font = `${Math.round(cw / 0.6)}px "Courier New", Courier, monospace`; cx.textBaseline = "alphabetic";
+  res.out.forEach((row, r) => row.forEach((codes, c) => { for (const k of codes) if (k !== 0x20) cx.fillText(t8Disp(k), c * cw, r * ch + Math.round(ch * 0.78)); }));
+}
+function t8Render(g, st) {
+  const o = t8Opts();
+  if (!g) { T8.res = T8.bytes = null; $("t8stats").textContent = "Noch kein Bild geladen."; const cv = $("t8cv"); cv.width = cv.height = 1; t8Buttons(); return; }
+  const res = t8Convert(g, st, o), bytes = t8Bytes(res, o), strikes = t8Strikes(res);
+  T8.res = res; T8.bytes = bytes; T8.opts = o;
+  t8Paint(res);
+  const mm = v => (v * 25.4).toFixed(0);
+  const mins = (strikes / T8_CPS / 60);
+  $("t8stats").textContent = `${res.cols} × ${res.lines} Zeichen · ${mm(res.cols / o.cpi)} × ${mm(res.lines / 6)} mm · ${strikes.toLocaleString("de-DE")} Anschläge` +
+    ` · bei ${T8_CPS} Zeichen/s ca. ${mins < 1.5 ? "1" : Math.round(mins)} min · Datei ${bytes.length.toLocaleString("de-DE")} Byte = ${Math.ceil(bytes.length / 254)} Blöcke`;
+  t8Buttons();
+}
+function t8Buttons() { $("t8add").disabled = !T8.bytes || !disk; $("t8txt").disabled = !T8.bytes; $("t8prg").disabled = $("t8test").disabled = !disk; }
+function t8Msg(t, cls) { const m = $("t8msg"); m.textContent = t; m.className = "msg " + (cls || ""); }
+
+// Testseite: Überdrucken mit CS und BS, Zeichenvorrat, Zeilenvorschub
+function t8TestBytes() {
+  // Text in Groß/Klein wie geschrieben: a–z → $41–$5A, A–Z → $C1–$DA (PETSCII des 8028)
+  const s = str => [...str].map(ch => { const c = ch.charCodeAt(0); return c >= 0x61 && c <= 0x7A ? c - 0x20 : c >= 0x41 && c <= 0x5A ? c + 0x80 : c; });
+  const CR = [13], X = 0xD8, O = 0xCF, b = [0x04];
+  b.push(...s("8028-Testseite fuer die Textgrafik"), ...CR, ...CR);
+  b.push(...s("1 Ueberdrucken mit CS:  XXXXXXXX"), 0x8D, ...s("                        OOOOOOOO   (X und O auf einer Stelle = CS geht)"), ...CR, ...CR);
+  b.push(...s("2 Ueberdrucken mit BS:  "));
+  for (let i = 0; i < 8; i++) b.push(X, 8, O);
+  b.push(...s("   (X und O auf einer Stelle = BS geht)"), ...CR, ...CR);
+  b.push(...s("3 Zeichenvorrat:"), ...CR, ...T8_CHARS, ...CR, ...CR);
+  b.push(...s("4 Diese Zeile"), ...CR, ...s("  und diese stehen direkt untereinander (CR = Zeilenvorschub)"), ...CR, ...CR, ...s("Ende"), ...CR);
+  return Uint8Array.from(b);
+}
+
+// Druckprogramm DRUCK8028 (BASIC, tokenisiert): liest die SEQ-Datei und schickt jedes Byte unverändert an den Drucker
+const T8_BASIC = [
+  '10 PRINT"DRUCK8028 - TEXTGRAFIK AUF DEN CBM 8028":D=4',
+  '20 F$="":INPUT"DATEI";F$:IF F$="" THEN END',
+  '30 D$="":INPUT"DRUCKER-ADRESSE (4)";D$:IF D$<>"" THEN D=VAL(D$)',
+  '40 OPEN 15,8,15:OPEN 2,8,2,"0:"+F$+",S,R":INPUT#15,E,E$:IF E THEN PRINT E;E$:CLOSE 2:CLOSE 15:END',
+  '50 OPEN 4,D:PRINT"DRUCKE ... (STOP = ABBRUCH)"',
+  '60 GET#2,A$:S=ST:IF A$="" THEN A$=CHR$(0)',
+  '70 PRINT#4,A$;:IF S=0 THEN 60',
+  '80 CLOSE 4:CLOSE 2:CLOSE 15:PRINT"FERTIG"',
+];
+const T8_TOKENS = ["END","FOR","NEXT","DATA","INPUT#","INPUT","DIM","READ","LET","GOTO","RUN","IF","RESTORE","GOSUB","RETURN","REM","STOP","ON","WAIT","LOAD","SAVE","VERIFY","DEF","POKE","PRINT#","PRINT","CONT","LIST","CLR","CMD","SYS","OPEN","CLOSE","GET","NEW","TAB(","TO","FN","SPC(","THEN","NOT","STEP","+","-","*","/","^","AND","OR",">","=","<","SGN","INT","ABS","USR","FRE","POS","SQR","RND","LOG","EXP","COS","SIN","TAN","ATN","PEEK","LEN","STR$","VAL","ASC","CHR$","LEFT$","RIGHT$","MID$","GO"];
+function t8Tokenize(lines, start = 0x0401) {
+  const order = T8_TOKENS.map((k, i) => [k, 0x80 + i]).sort((a, b) => b[0].length - a[0].length);
+  const out = [start & 255, start >> 8]; let addr = start;
+  for (const line of lines) {
+    const m = /^(\d+)\s*(.*)$/.exec(line), body = [];
+    let s = m[2], quote = false, rem = false;
+    for (let i = 0; i < s.length;) {
+      const ch = s[i];
+      if (quote || rem) { body.push(ch.charCodeAt(0)); if (ch === '"') quote = !quote; i++; continue; }
+      if (ch === '"') { quote = true; body.push(0x22); i++; continue; }
+      if (ch === " ") { i++; continue; }                     // Leerzeichen außerhalb von Texten weglassen
+      const kw = order.find(([k]) => s.startsWith(k, i));
+      if (kw) { body.push(kw[1]); if (kw[0] === "REM") rem = true; i += kw[0].length; continue; }
+      body.push(ch.charCodeAt(0)); i++;
+    }
+    const len = 2 + 2 + body.length + 1; addr += len;
+    out.push(addr & 255, addr >> 8, +m[1] & 255, +m[1] >> 8, ...body, 0);
+  }
+  out.push(0, 0);
+  return Uint8Array.from(out);
+}
+
+function t8Write(name, data, type) {
+  const nb = petEncode(name, 16), nm = petDecode(nb);
+  const ex = disk.entries().find(e => petDecode(e.nameBytes) === nm);
+  if (ex) { if (!confirm(`"${nm}" existiert schon im D64. Überschreiben?`)) return; if (selEntry && selEntry.base === ex.base) closePeek(); disk.remove(ex); }
+  try { const blocks = disk.writeFile(nb, data, type); diskChanged(); t8Msg(`"${nm}" geschrieben: ${data.length} Byte, ${blocks} Blöcke, ${TYPES[type]}.`, "ok"); }
+  catch (err) { t8Msg(err.message, "err"); }
+}
+$("t8add").onclick = () => {
+  if (!T8.bytes || !disk) return;
+  const n = $("t8name").value.trim();
+  if (!n) { t8Msg("Bitte einen Dateinamen eingeben.", "err"); return; }
+  t8Write(n, T8.bytes, 1);
+};
+$("t8prg").onclick = () => t8Write("DRUCK8028", t8Tokenize(T8_BASIC), 2);
+$("t8test").onclick = () => t8Write("8028TEST", t8TestBytes(), 1);
+$("t8txt").onclick = () => {
+  if (!T8.res) return;
+  const txt = T8.res.out.map(r => r.map(c => t8Disp(c[0])).join("").replace(/ +$/, "")).join("\r\n") + "\r\n";
+  download(new TextEncoder().encode(txt), (petDecode(petEncode($("t8name").value || "TEXT", 16)) || "TEXT").toLowerCase() + ".txt");
+};
+for (const id of ["t8cols", "t8over"]) $(id).addEventListener("change", render);
+/* ==== END 8028 ==== */
+/* ==== BEGIN PLOT ==== */
+/* ---------------------------------------------------------------- Plotter (HSGMENU)
+   Vorschau des Plots auf Papier und Einstellungen, die beim Hinzufügen ins D64 direkt in HSGMENU
+   geschrieben werden (Adressen 1043–1056 wie die POKEs). Die Vorschau nutzt dieselben Referenzen
+   (HP.hatchRef / HP.kringelRef), gegen die der 6502-Code in den Tests Byte für Byte geprüft wird. */
+const PL_CFG_ADDR = 1043, PL_LOAD = 0x0401;
+const PL = { last: null };
+function plOpts() {
+  // Zahl aus dem Feld, auf den gültigen Bereich begrenzt (ungültig = Vorgabe)
+  const n = (id, lo, hi, def) => { const v = parseInt($(id).value, 10); return isNaN(v) ? def : Math.min(hi, Math.max(lo, v)); };
+  return {
+    mode: $("plMode").value, dev: n("plDev", 4, 30, 5), scl: n("plScl", 4, 20, 14), pen: n("plPen", 1, 8, 1),
+    x0: n("plX0", 0, 30000, 1800), y0: n("plY0", 0, 30000, 250),
+    inv: $("plInv").checked ? 1 : 0, gap: n("plGap", 0, 8, 0), th: [n("plT1", 1, 17, 2), n("plT2", 1, 17, 5), n("plT3", 1, 17, 8), n("plT4", 1, 17, 11)],
+  };
+}
+// Einstellbytes 1043–1056 (Reihenfolge wie im Assembler-Quelltext)
+function plCfgBytes(o) {
+  const lo = v => v & 255, hi = v => (v >> 8) & 255;
+  return [o.dev, 0, o.scl, lo(o.x0), hi(o.x0), lo(o.y0), hi(o.y0), o.inv, o.pen, o.gap, ...o.th];
+}
+function plPatched(base, o) {
+  const d = Uint8Array.from(base), off = PL_CFG_ADDR - PL_LOAD + 2;
+  plCfgBytes(o).forEach((v, i) => { d[off + i] = v; });
+  return d;
+}
+// HP-GL auf die Leinwand zeichnen (Plotter-Einheiten, Y nach oben)
+function plPaint(hpgl, o, raster) {
+  const cv = $("plcv"), size = 720, span = 512 * o.scl, k = size / span;
+  cv.width = cv.height = size;
+  const cx = cv.getContext("2d");
+  cx.fillStyle = "#fff"; cx.fillRect(0, 0, size, size);
+  cx.strokeStyle = "#123"; cx.fillStyle = "#123"; cx.lineCap = "round"; cx.lineJoin = "round";
+  cx.lineWidth = Math.max(0.6, 12 * k);                         // 0,3-mm-Stift = 12 Einheiten
+  const X = x => (x - o.x0) * k, Y = y => size - (y - o.y0) * k;
+  if (raster) {                                                  // Punkte-Modus: Raster direkt
+    const r = Math.max(0.5, 6 * k);
+    for (let pr = 0; pr < 512; pr++) for (let x = 0; x < 512; x++) if (raster[(511 - pr) * 512 + x]) cx.fillRect(X(o.x0 + x * o.scl) - r, Y(o.y0 + pr * o.scl) - r, 2 * r, 2 * r);
+    return;
+  }
+  let x = 0, y = 0;
+  cx.beginPath();
+  for (const c of HP.parseHPGL(hpgl)) {
+    if (c.op === "PU") { for (let i = 0; i + 1 < c.args.length; i += 2) { x = c.args[i]; y = c.args[i + 1]; } }
+    else if (c.op === "PD") {
+      cx.moveTo(X(x), Y(y));
+      if (!c.args.length) cx.lineTo(X(x) + 0.01, Y(y));
+      for (let i = 0; i + 1 < c.args.length; i += 2) { x = c.args[i]; y = c.args[i + 1]; cx.lineTo(X(x), Y(y)); }
+    }
+  }
+  cx.stroke();
+}
+// shown = Bildschirmpunkte (1 = hell), H Zeilen
+function plRender(shown) {
+  const o = plOpts();
+  for (const [id, v] of [["plT1O", o.th[0]], ["plT2O", o.th[1]], ["plT3O", o.th[2]], ["plT4O", o.th[3]]]) $(id).textContent = v > 16 ? "aus" : v;
+  const mm = (512 * o.scl * 0.025).toFixed(0);
+  $("plSize").textContent = `${mm} × ${mm} mm`;
+  plUpdateProgram(o);
+  if (!shown || $("target").value !== "plot") return;
+  const P = HP.expected(shown, H, o.inv === 1, o.mode === "points" ? o.gap : 0), cfg = { s: o.scl, x0: o.x0, y0: o.y0, pen: o.pen };
+  let hpgl = null, stats;
+  if (o.mode === "hatch") { hpgl = HP.hatchRef(P, cfg, o.th); stats = HP.penStats(hpgl); }
+  else if (o.mode === "kringel") { hpgl = HP.kringelRef(P, cfg); stats = HP.penStats(hpgl); }
+  else {                                                         // Punkte: Folgen zählen (ohne Verbindungen zwischen Zeilen)
+    let runs = 0, len = 0;
+    for (let pr = 0; pr < 512; pr++) for (let x = 0; x < 512; x++) { const v = P[(511 - pr) * 512 + x]; len += v; if (v && (x === 0 || !P[(511 - pr) * 512 + x - 1])) runs++; }
+    stats = { lowers: runs, downTravel: (len - runs) * o.scl, upTravel: NaN };
+  }
+  plPaint(hpgl, o, hpgl ? null : P);
+  const m = v => (v * 0.025 / 1000).toFixed(1).replace(".", ",");
+  $("plStats").textContent = `${{ hatch: "Schraffur (S)", kringel: "Kringel (K)", points: "Punkte (P/H)" }[o.mode]} · ${mm} × ${mm} mm · ` +
+    `${o.mode === "points" ? "ca. " : ""}${stats.lowers.toLocaleString("de-DE")} × Stift senken · Zeichenweg ${m(stats.downTravel)} m` +
+    (isNaN(stats.upTravel) ? "" : ` · Leerfahrt ${m(stats.upTravel)} m`);
+}
+// HSGMENU mit den aktuellen Einstellungen (für D64 und Download)
+function plUpdateProgram(o) {
+  const v = VIEWERS.HSGMENU; if (!v || !v.base) return;
+  const nd = plPatched(v.base, o || plOpts());
+  if (!v.data || nd.length !== v.data.length || nd.some((b, i) => b !== v.data[i])) { v.data = nd; if (typeof updateViewerInfo === "function" && disk) updateViewerInfo(); }
+}
+function plMsg(t, cls) { const m = $("plMsg"); m.textContent = t; m.className = "msg " + (cls || ""); }
+$("plAdd").onclick = () => {
+  if (!disk) return;
+  try { const e = findViewer(disk, "HSGMENU"); if (e) disk.remove(e); disk.writeFile(petEncode("HSGMENU", 16), VIEWERS.HSGMENU.data, 2); diskChanged(); plMsg("HSGMENU mit diesen Einstellungen ins D64 geschrieben.", "ok"); }
+  catch (err) { plMsg(err.message, "err"); }
+};
+$("plDl").onclick = () => download(VIEWERS.HSGMENU.data, "hsgmenu.prg");
+$("plReset").onclick = () => {
+  for (const [id, v] of [["plDev", 5], ["plScl", 14], ["plPen", 1], ["plX0", 1800], ["plY0", 250], ["plGap", 0], ["plT1", 2], ["plT2", 5], ["plT3", 8], ["plT4", 11]]) $(id).value = v;
+  $("plInv").checked = true; render();
+};
+for (const el of document.querySelectorAll("#plCard input, #plCard select, #target")) { el.addEventListener("input", render); el.addEventListener("change", render); }
+function applyTarget() {
+  const t = $("target").value;
+  $("plCard").classList.toggle("hidden", t !== "plot"); $("plView").classList.toggle("hidden", t !== "plot");
+  $("t8card").classList.toggle("hidden", t !== "print"); $("t8View").classList.toggle("hidden", t !== "print");
+  $("targetNote").textContent = {
+    screen: "Bild für den HSG-Bildschirm: als Datei ins D64 (Anzeige mit HSGIMAGE oder HSGMENU, Taste 1) oder live über HSG-Link (HSGSER oder HSGMENU, Taste 2).",
+    plot: "Plot auf einem HP-Plotter am IEEE-Bus mit HSGMENU. Die Einstellungen unten werden beim Hinzufügen direkt ins Programm geschrieben, POKEs sind nicht mehr nötig.",
+    print: "Textgrafik für den Typenraddrucker CBM 8028: SEQ-Datei ins D64, gedruckt mit DRUCK8028.",
+  }[t];
+}
+$("target").addEventListener("change", applyTarget);
+/* ==== END PLOT ==== */
+$("dlMenu").onclick = () => download(VIEWERS.HSGMENU.data, "hsgmenu.prg");
+/* ---------------------------------------------------------------- Einstellungen merken */
+const SETTINGS = ["target","withMenu","plMode","plT1","plT2","plT3","plT4","plInv","plScl","plGap","plPen","plDev","plX0","plY0","t8cols","t8over","t8name","chip","withViewer","withSer","fit","par","mw","mh","bgc","auto","bri","con","gam","shp","dith","thr","str","serp","inv","lsb","flip","ftype","hdr","addr","phos","scale"];
+function saveSettings() {
+  try { const o = {}; for (const k of SETTINGS) { const el = ctl(k); o[k] = el.type === "checkbox" ? el.checked : el.value; } localStorage.setItem("hsg.settings", JSON.stringify(o)); } catch (_) {}
+}
+function loadSettings() {
+  try {
+    const o = JSON.parse(localStorage.getItem("hsg.settings") || "{}");
+    // Bildschirmgeometrie startet immer „laut Datenblatt“ – sonst wird das Bild am echten CBM gestaucht.
+    // Nur eine eigene Messung wird wiederhergestellt.
+    if (o.par !== "custom") delete o.par;
+    for (const k of SETTINGS) if (k in o) { const el = ctl(k); if (el.type === "checkbox") el.checked = o[k]; else el.value = o[k]; }
+  } catch (_) {}
+}
+function b64(u8) { let s = ""; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); }
+function unb64(s) { const b = atob(s), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+
+document.querySelectorAll("#controls input, #controls select, #scale").forEach(el => el.addEventListener("input", render));
+document.querySelectorAll("#controls select, #controls input[type=checkbox], #scale").forEach(el => el.addEventListener("change", render));
+
+for (const v of Object.values(VIEWERS)) $(v.box).addEventListener("change", () => { saveSettings(); updateViewerInfo(); });
+loadSettings();
+document.querySelectorAll("select").forEach(s => { if (s.selectedIndex < 0) s.selectedIndex = [...s.options].findIndex(o => o.defaultSelected) >>> 0; });   // ungültige gespeicherte Werte: Vorgabe
+try {
+  const s = localStorage.getItem("hsg.d64");
+  if (s) { const u = unb64(s); if (u.length === D64_SIZE) { disk = new D64(u); $("dfile").value = localStorage.getItem("hsg.d64name") || "hsgimage.d64"; } }
+} catch (_) {}
+for (const vw of Object.values(VIEWERS)) {
+  vw.data = unb64(vw.b64);
+  try {
+    // Ein aus einem D64 übernommener Viewer gilt nur, solange die eingebettete Version dieselbe ist.
+    // Nach einem Update des Konverters gewinnt die neue eingebettete Version.
+    const v = localStorage.getItem(vw.key);
+    if (v && localStorage.getItem(vw.key + "Base") !== vw.b64) { localStorage.removeItem(vw.key); localStorage.removeItem(vw.key + "Src"); }
+    else if (v) { vw.data = unb64(v); vw.src = localStorage.getItem(vw.key + "Src") || "zuletzt geöffnetes D64"; }
+  } catch (_) {}
+}
+VIEWERS.HSGMENU.base = unb64(HSGMENU_B64); VIEWERS.HSGMENU.data = plPatched(VIEWERS.HSGMENU.base, plOpts());
+if (!disk) disk = blankDisk();
+renderDir(); updateViewerInfo();
+render();
+window.__hsg = { D64, get disk() { return disk; }, get packed() { return packed; }, VIEWERS, HP, T8, PL, plOpts, plPatched, plCfgBytes, t8Tokenize, t8TestBytes, T8_BASIC }; // für Tests
+</script>
+</body>
+</html>

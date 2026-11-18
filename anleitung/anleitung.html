@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>HSG-Link – Anleitung Installation und Inbetriebnahme</title>
+<style>
+@page { size: A4; margin: 16mm 15mm 18mm 15mm;
+  @bottom-center { content: "HSG-Link · Anleitung · Seite " counter(page) " von " counter(pages); font: 8pt system-ui, "Segoe UI", sans-serif; color: #777; } }
+@page :first { @bottom-center { content: none; } }
+:root { --ink:#1b1f1a; --muted:#5d665a; --line:#cfd5cb; --acc:#1d5e2e; --warn:#9a4500; --pcb:#1d5e2e; --gold:#c9a23a; }
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; color: var(--ink); font: 10pt/1.45 "Segoe UI", system-ui, sans-serif; }
+h1 { font-size: 22pt; margin: 0 0 4pt; color: var(--acc); }
+h2 { font-size: 15pt; margin: 0 0 8pt; padding-bottom: 3pt; border-bottom: 2px solid var(--acc); color: var(--acc); break-after: avoid; }
+h3 { font-size: 11.5pt; margin: 12pt 0 4pt; break-after: avoid; }
+p { margin: 0 0 6pt; }
+.chapter { break-before: page; }
+ol, ul { margin: 2pt 0 8pt 16pt; padding: 0; } li { margin: 2pt 0; }
+table { border-collapse: collapse; width: 100%; margin: 4pt 0 8pt; font-variant-numeric: tabular-nums; break-inside: avoid; }
+th, td { border-bottom: 1px solid var(--line); padding: 3pt 5pt; text-align: left; vertical-align: top; }
+th { font-size: 8pt; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); }
+code, .k { font-family: Consolas, "Courier New", monospace; background: #eef1ea; padding: 0 3pt; border-radius: 3px; font-size: 9.2pt; }
+pre { font-family: Consolas, monospace; background: #f1f3ee; border: 1px solid var(--line); padding: 6pt 8pt; border-radius: 5px; font-size: 9pt; margin: 4pt 0 8pt; break-inside: avoid; white-space: pre-wrap; }
+.box { border: 1px solid var(--line); border-left: 4px solid var(--acc); background: #f4f8f2; padding: 6pt 9pt; border-radius: 4px; margin: 6pt 0 9pt; break-inside: avoid; }
+.warn { border-left-color: var(--warn); background: #fff4e8; }
+.warn b.t { color: var(--warn); }
+.cbm { font-family: Consolas, monospace; background: #0b1a0d; color: #6dff86; padding: 6pt 9pt; border-radius: 5px; margin: 4pt 0 8pt; white-space: pre; font-size: 9.5pt; break-inside: avoid; }
+.check li { list-style: "☐  "; }
+.sub { color: var(--muted); font-size: 8.8pt; }
+.fig { break-inside: avoid; margin: 6pt 0 10pt; }
+.fig svg { width: 100%; height: auto; display: block; }
+.cap { color: var(--muted); font-size: 8.5pt; margin-top: 3pt; }
+.sw { display: inline-block; width: 22px; height: 8px; border-radius: 2px; border: 1px solid #0006; vertical-align: middle; }
+.title-page { height: 255mm; display: flex; flex-direction: column; justify-content: center; }
+.title-page .big { font-size: 34pt; font-weight: 800; color: var(--acc); line-height: 1.05; }
+.title-page .tag { font-size: 14pt; margin: 8pt 0 24pt; }
+.toc { columns: 2; column-gap: 18pt; font-size: 10pt; }
+.toc div { break-inside: avoid; margin: 1pt 0; }
+.step { counter-increment: st; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12pt; }
+/* Lötplan-Tabellen aus verdrahtung.html */
+#tbl td, #tbl th, #full td, #full th { padding: 2pt 4pt; font-size: 8.8pt; }
+</style>
+</head>
+<body>
+
+<!-- ================================================================ Titel -->
+<section class="title-page">
+  <div class="sub">Commodore CBM 8032 · HSG-Board (EF9365 / EF9366)</div>
+  <div class="big">HSG-Link</div>
+  <div class="tag">Bilder vom PC direkt auf den HSG-Bildschirm des CBM –<br>Anleitung für Aufbau, Installation und Inbetriebnahme, von Anfang an</div>
+
+  <svg viewBox="0 0 760 150" style="width:100%">
+    <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#1d5e2e"/></marker></defs>
+    <g font-family="Segoe UI" font-size="13" text-anchor="middle">
+      <rect x="0" y="35" width="150" height="70" rx="8" fill="#eef4ec" stroke="#1d5e2e"/><text x="75" y="64" font-weight="700">PC</text><text x="75" y="84" font-size="11">Konverter im Browser</text>
+      <rect x="200" y="35" width="150" height="70" rx="8" fill="#eef4ec" stroke="#1d5e2e"/><text x="275" y="64" font-weight="700">Pro Micro</text><text x="275" y="84" font-size="11">Sketch HSGLink</text>
+      <rect x="400" y="35" width="150" height="70" rx="8" fill="#eef4ec" stroke="#1d5e2e"/><text x="475" y="64" font-weight="700">CBM 8032</text><text x="475" y="84" font-size="11">Viewer HSGSER</text>
+      <rect x="600" y="35" width="150" height="70" rx="8" fill="#eef4ec" stroke="#1d5e2e"/><text x="675" y="64" font-weight="700">HSG-Board</text><text x="675" y="84" font-size="11">Monitor(e)</text>
+      <path d="M150 70H198" stroke="#1d5e2e" stroke-width="2.5" marker-end="url(#ar)"/><path d="M350 70H398" stroke="#1d5e2e" stroke-width="2.5" marker-end="url(#ar)"/><path d="M550 70H598" stroke="#1d5e2e" stroke-width="2.5" marker-end="url(#ar)"/>
+      <text x="175" y="58" font-size="10">USB</text><text x="375" y="58" font-size="10">Userport</text><text x="575" y="58" font-size="10">Bus</text>
+    </g>
+  </svg>
+
+  <div class="toc" style="margin-top:22pt">
+    <div>1 · Was ist HSG-Link?</div>
+    <div>2 · Was du brauchst</div>
+    <div>3 · Das Kabel löten</div>
+    <div>4 · Arduino: Programm aufspielen</div>
+    <div>5 · Die Diskette (D64) vorbereiten</div>
+    <div>6 · Der Konverter im Browser</div>
+    <div>7 · Inbetriebnahme am CBM</div>
+    <div>8 · Bilder ohne Kabel: HSGIMAGE</div>
+    <div>9 · Fehlersuche</div>
+    <div>10 · Anhang: Belegung, Protokoll, Dateien</div>
+  </div>
+  <p class="sub" style="margin-top:28pt">Stand 14.11.2026. Alle Angaben zu Userport-Belegung und HSG-Board stammen aus dem Commodore-Schaltplan 8032029, dem HSG-Handbuch und dem Datenblatt EF9365/66. Software im Emulator getestet; Kabel und Ablauf am echten Gerät mit dem ersten Bild erfolgreich erprobt.</p>
+</section>
+
+<!-- ================================================================ 1 -->
+<section class="chapter">
+  <h2>1 · Was ist HSG-Link?</h2>
+  <p>Das HSG-Board („Hochauflösende Grafik“ von Commodore Deutschland) zeigt 512 × 256 Punkte (EF9366, Version B) bzw. 512 × 512 Punkte (EF9365, Version A). Bisher kamen Bilder nur von Diskette auf den Schirm. Mit HSG-Link schickst du ein beliebiges Bild vom PC <b>per Kabel direkt</b> auf das HSG-Board – und änderst es sogar live.</p>
+  <h3>So arbeiten die Teile zusammen</h3>
+  <ol>
+    <li><b>Konverter</b> (<code>hsg-converter.html</code>): Läuft im Browser am PC. Du ziehst ein Foto hinein, er macht daraus ein Schwarz-Weiß-Punktbild in HSG-Größe und zeigt dir vorher genau, wie es aussehen wird.</li>
+    <li><b>Pro Micro</b>: Ein kleines Arduino-Board für etwa 9 €. Es hängt per USB am PC und mit einem selbst gelöteten Kabel am <b>Userport</b> des CBM. Es reicht die Bytes vom PC einzeln an den CBM weiter.</li>
+    <li><b>HSGSER</b>: Ein kleines Maschinenprogramm auf dem CBM. Es nimmt die Bytes am Userport entgegen und zeichnet die Punkte auf das HSG-Board.</li>
+  </ol>
+  <div class="box"><b>Wie lange dauert ein Bild?</b> Ein volles Bild hat 16 384 Byte (EF9366). Die Zeit hängt vor allem davon ab, wie viele Punkte gesetzt sind, denn der CBM zeichnet jeden Punkt einzeln. Bei einem Bild mit halb hellen Punkten rechnet allein der 6502 etwa 9 Sekunden. Bei <b>Live</b> werden später nur die geänderten Stellen übertragen.</div>
+  <div class="box"><b>Der Ton beim Übertragen ist normal.</b> Der CBM bestätigt jedes Byte über die Leitung CB2. An dieser Leitung hängt beim 8032 auch der eingebaute Lautsprecher. Das Klicken je Byte ergibt einen Ton, der wie eine Fortschrittsanzeige klingt. Schaden entsteht dadurch keiner.</div>
+  <h3>Wofür welche Datei?</h3>
+  <table>
+    <tr><th>Datei</th><th>Wofür</th></tr>
+    <tr><td><code>hsg-converter.html</code></td><td>Der Konverter. Doppelklick öffnet ihn im Browser.</td></tr>
+    <tr><td><code>serial/HSGLink/HSGLink.ino</code></td><td>Das Programm (Sketch) für den Pro Micro.</td></tr>
+    <tr><td><code>serial/hsgser.d64</code></td><td>Disketten-Image mit den CBM-Programmen <b>HSGSER</b> (Empfang per Kabel) und <b>HSGIMAGE</b> (Bilder von Diskette).</td></tr>
+    <tr><td><code>serial/verdrahtung.html</code></td><td>Lötplan zum Ausdrucken (gleiche Zeichnungen wie in Kapitel 3).</td></tr>
+    <tr><td><code>serial/README.md</code></td><td>Technische Kurzfassung.</td></tr>
+  </table>
+</section>
+
+<!-- ================================================================ 2 -->
+<section class="chapter">
+  <h2>2 · Was du brauchst</h2>
+  <h3>Teile (Einkaufsliste, geprüft am 09.11.2026)</h3>
+  <table>
+    <tr><th>Anz.</th><th>Teil</th><th>Bezugsquelle (Beispiel)</th><th>ca. Preis</th></tr>
+    <tr><td>1</td><td><b>Pro Micro, ATmega32U4, 5 V / 16 MHz</b> (Micro-USB). Wichtig: die <b>5-V</b>-Ausführung, nicht 3,3 V.</td><td>BerryBase CH-APROMIC (mit USB-Kabel), alternativ Reichelt JOY-IT 330660</td><td>9 €</td></tr>
+    <tr><td>10</td><td><b>Widerstand 470 Ω</b>, ¼ W (Farbringe gelb-violett-schwarz-schwarz-braun)</td><td>BerryBase MSW470R.25</td><td>0,50 €</td></tr>
+    <tr><td>1</td><td><b>Dupont-Kabelset</b> mit Female-Male-Adern, 20 cm</td><td>BerryBase DUPK-SET-20</td><td>5 €</td></tr>
+    <tr><td>1</td><td><b>Userport-Stecker</b>: Kartenstecker 2 × 12 Kontakte, Raster 3,96 mm (gleiche Bauform wie C64-Userport)</td><td>eBay, Suchbegriff „Userport Stecker 2x12 3,96“</td><td>5 €</td></tr>
+    <tr><td>–</td><td>Schrumpfschlauch ca. 2–3 mm (oder Isolierband)</td><td>Vorrat / Baumarkt</td><td></td></tr>
+    <tr><td>opt.</td><td>2 Codierplättchen für den Kartenstecker (Verpolschutz)</td><td>eBay</td><td>2 €</td></tr>
+  </table>
+  <h3>Werkzeug</h3>
+  <ul>
+    <li>Lötkolben oder Lötstation (um 330 °C) mit feiner Spitze, Lötzinn 0,5–1 mm mit Flussmittelseele</li>
+    <li>Seitenschneider, Abisolierzange (oder vorsichtig mit dem Cuttermesser)</li>
+    <li><b>Multimeter</b> mit Durchgangsprüfer und Ohm-Bereich</li>
+    <li>Feuerzeug oder Heißluftföhn für den Schrumpfschlauch, „dritte Hand“ oder Klemme, Edding</li>
+  </ul>
+  <h3>Am PC</h3>
+  <ul>
+    <li><b>Google Chrome</b> oder <b>Microsoft Edge</b> (Firefox und Safari können keine USB-Seriell-Verbindung aus dem Browser).</li>
+    <li><b>Arduino IDE</b> 2.x, kostenlos von <code>arduino.cc/en/software</code>.</li>
+    <li>Den Projektordner <code>Converter_Dave</code> mit den Dateien aus Kapitel 1.</li>
+  </ul>
+  <h3>Am CBM</h3>
+  <ul>
+    <li>CBM 8032 mit eingebautem <b>HSG-Board</b>, HSG-Umschalter am Gehäuse.</li>
+    <li>Ein Laufwerk, das D64-Images lesen kann (bei dir die 9096 mit SD-Karte), Geräteadresse 8.</li>
+  </ul>
+</section>
+
+<!-- ================================================================ 3 -->
+<section class="chapter">
+  <h2>3 · Das Kabel löten</h2>
+  <div class="box warn"><b class="t">Vorweg drei Regeln:</b> (1) Das Kabel nur bei <b>ausgeschaltetem</b> CBM auf- oder abstecken. (2) Die <b>+5 V</b> des Userports und den Pin <b>RAW/VCC</b> am Pro Micro <b>nie</b> verbinden – der Pro Micro bekommt seinen Strom über USB. (3) Die <b>obere Kontaktreihe 1–12</b> bleibt komplett frei (dort liegen Video, Kassette und der Diagnose-Kontakt).</div>
+
+  <h3>3.1 Wo ist der Userport?</h3>
+  <p>Stell dich <b>hinter</b> den CBM. An der Rückwand siehst du Ausschnitte, in denen die Kante der Hauptplatine mit goldenen Kontakten liegt. Der Userport ist die <b>lange Kante im mittleren Ausschnitt</b>. Rechts daneben steckt der graue IEEE-488-Stecker zur Floppy bzw. 9096 – der bleibt, wie er ist. Beide werden gleichzeitig benutzt.</p>
+  <div class="fig"><svg id="panel" viewBox="0 0 1120 190"></svg><div class="cap">Bild 1: Rückseite des CBM 8032-32 B, von hinten gesehen.</div></div>
+
+  <h3>3.2 Wo ist Kontakt A?</h3>
+  <p>Die Kante hat oben 12 Kontakte (1–12) und auf der Unterseite 12 Kontakte (A–N, ohne G und I). Von hinten gesehen liegt <b>A links</b>. Du erkennst es an den zwei <b>Codierschlitzen</b>: Links steht nur <b>ein</b> Kontakt außerhalb des Schlitzes, rechts stehen <b>zwei</b>.</p>
+  <div class="fig"><svg id="rear" viewBox="0 0 1120 470"></svg><div class="cap">Bild 2: ① die Platinenkante von hinten, ② der aufgesteckte Stecker von hinten. Die Lötösen zeigen zu dir; A ist links unten. An jeder Lötöse steht, welcher Pro-Micro-Pin dorthin kommt.</div></div>
+</section>
+
+<section class="chapter">
+  <h3 style="margin-top:0">3.3 Der Pro Micro</h3>
+  <p>Der Pro Micro hat zwei Reihen mit je 12 Anschlüssen. Die Beschriftung steht auf der Platine (der „Siebdruck“). Wir brauchen <b>2 bis 9</b> (acht Datenleitungen), <b>10</b> (Strobe), <b>16</b> (Quittung) und <b>GND</b> (Masse). Prüfe die Beschriftung auf deinem Board – Nachbauten sind fast immer gleich beschriftet.</p>
+  <div class="fig"><svg id="plan" viewBox="0 0 1120 670"></svg><div class="cap">Bild 3: Verdrahtungsschema. Der Stecker ist hier hochkant und nur schematisch gezeichnet, damit sich die Leitungen nicht kreuzen. Die echte Lage zeigt Bild 2 ②. Maßgeblich sind die Buchstaben.</div></div>
+  <table id="tbl"><thead><tr><th>✓</th><th>Farbe</th><th>Pro Micro</th><th>470 Ω</th><th>Userport</th><th>Signal</th></tr></thead><tbody></tbody></table>
+</section>
+
+<section class="chapter">
+  <h3 style="margin-top:0">3.4 Löten Schritt für Schritt</h3>
+  <div class="box"><b>Noch nie gelötet?</b> Spitze heiß machen und kurz am feuchten Schwamm abwischen. Lötstelle (Draht <i>und</i> Öse) 1–2 Sekunden mit der Spitze anwärmen, dann Lötzinn an die Stelle – nicht an die Spitze – halten, bis es fließt. Spitze weg, nicht wackeln, bis das Zinn erstarrt ist. Eine gute Lötstelle glänzt und umschließt den Draht wie ein kleiner Kegel. Vorher an einem Reststück üben.</div>
+  <ol>
+    <li><b>Stiftleisten an den Pro Micro löten.</b> Die beiden 12er-Leisten liegen dem Board bei. Lange Seite der Stifte nach unten, Board oben drauf; am besten die Leisten zum Ausrichten in ein Steckbrett stecken. Erst je einen Stift an den Enden löten, Sitz prüfen, dann den Rest.</li>
+    <li><b>11 Adern vorbereiten.</b> Vom Dupont-Set 11 <b>Female-Male</b>-Adern abtrennen, möglichst in den Farben aus Bild 3. Das <b>Buchsen-Ende (female)</b> kommt später auf den Pro Micro. Das <b>Stecker-Ende (male)</b> abschneiden, 5 mm abisolieren, die Litze verdrillen und dünn verzinnen.</li>
+    <li><b>Widerstände einsetzen.</b> In <b>10</b> Adern (alle außer der schwarzen Masse-Ader) je einen 470-Ω-Widerstand einlöten: Ader durchtrennen, beide Enden verzinnen, Widerstandsbeinchen auf ca. 8 mm kürzen und mit den Enden verlöten. <b>Vorher ein Stück Schrumpfschlauch auf die Ader schieben</b>, danach über den Widerstand ziehen und erhitzen. Die Widerstände sollen nah am Stecker sitzen.</li>
+    <li><b>Stecker halten wie später aufgesteckt.</b> Lötösen zu dir, die Reihe A–N unten, <b>A links</b> (Bild 2 ②). Mit Edding ein „A“ an den Stecker schreiben.</li>
+    <li><b>Adern an die untere Reihe löten</b> – Reihenfolge laut Tabelle: A = schwarz (GND), B = weiß (Pin 10), C–L = braun … grau (Pins 2–9), M = weiß mit Markierung (Pin 16). Zusätzlich N mit einem kurzen Draht an A anschließen (zweite Masseverbindung). Die obere Reihe bleibt frei.</li>
+    <li><b>Kontrolle mit dem Multimeter</b> (Kabel noch nicht am CBM):
+      <ul>
+        <li>Jede Buchse am Pro-Micro-Ende zu ihrem Stecker-Kontakt: ca. <b>470 Ω</b> (Masse: 0 Ω).</li>
+        <li>Benachbarte Kontakte am Stecker untereinander: <b>kein Durchgang</b> (außer A–N, die sind gebrückt).</li>
+        <li>Nichts aus der oberen Reihe darf irgendwohin Durchgang haben.</li>
+      </ul></li>
+    <li><b>Optional:</b> Codierplättchen an den Schlitzpositionen in den Stecker setzen (zwischen A/B und L/M, rot in Bild 2).</li>
+    <li><b>Buchsen auf den Pro Micro stecken</b>: braun → 2, rot → 3, orange → 4, gelb → 5, grün → 6, blau → 7, violett → 8, grau → 9, weiß → 10, weiß markiert → 16, schwarz → GND.</li>
+  </ol>
+  <h3>3.5 Optional: Gegenprobe am CBM (ohne Pro Micro)</h3>
+  <p>Wer ganz sicher gehen will, misst am eingeschalteten CBM mit dem Multimeter gegen Masse:</p>
+  <div class="cbm">POKE 59459,255        (Port A wird Ausgang)
+POKE 59471,1          → nur Kontakt C (PA0) führt High (ca. 2,5–5 V)
+POKE 59471,128        → nur Kontakt L (PA7) führt High
+POKE 59459,0          (zurück auf Eingang – oder aus- und einschalten)</div>
+  <p class="sub">Danach erst ausschalten und den Stecker aufstecken.</p>
+</section>
+
+<!-- ================================================================ 4 -->
+<section class="chapter">
+  <h2>4 · Arduino: Programm aufspielen</h2>
+  <p>Das Programm für den Pro Micro heißt bei Arduino „Sketch“. Du spielst es einmal auf; danach behält der Pro Micro es dauerhaft. Dafür muss das Kabel <b>nicht</b> am CBM hängen.</p>
+  <h3>4.1 Arduino IDE installieren</h3>
+  <ol>
+    <li><code>arduino.cc/en/software</code> öffnen, „Windows“ herunterladen, installieren. Bei der Frage nach Treibern immer „Installieren“ bestätigen.</li>
+    <li>IDE starten. Beim ersten Start lädt sie ein paar Minuten lang Zusatzpakete – abwarten.</li>
+  </ol>
+  <h3>4.2 Pro Micro anschließen und Board wählen</h3>
+  <ol>
+    <li>Pro Micro mit dem <b>beiliegenden</b> USB-Kabel an den PC stecken (manche Kabel laden nur und übertragen keine Daten). Eine LED leuchtet.</li>
+    <li>In der IDE: <b>Werkzeuge → Board → Arduino AVR Boards → Arduino Leonardo</b>. Der Pro Micro benutzt denselben Chip und Bootloader wie der Leonardo.</li>
+    <li><b>Werkzeuge → Port</b>: den Eintrag mit „Arduino Leonardo“ wählen, z. B. <code>COM4</code>. Ist er nicht da: siehe 4.5.</li>
+  </ol>
+  <h3>4.3 Sketch öffnen und hochladen</h3>
+  <ol>
+    <li><b>Datei → Öffnen</b> → <code>Converter_Dave\serial\HSGLink\HSGLink.ino</code>.</li>
+    <li>Auf den <b>Pfeil nach rechts</b> („Hochladen“) oben links klicken. Die IDE übersetzt erst (ca. 5 078 Byte) und spielt dann auf.</li>
+    <li>Unten erscheint „Hochladen abgeschlossen“. Fertig.</li>
+  </ol>
+  <h3>4.4 Test</h3>
+  <ol>
+    <li><b>Werkzeuge → Serieller Monitor</b> öffnen (Baudrate egal, z. B. 115200).</li>
+    <li>Es erscheint <code>HSGLINK 1.0</code>. Damit läuft der Sketch.</li>
+    <li>Schickst du jetzt ein Zeichen, kommt nach 3 Sekunden <code>E TIMEOUT 0</code> und <code>R</code> – richtig so, denn es ist noch kein CBM angeschlossen.</li>
+    <li><b>Seriellen Monitor wieder schließen!</b> Nur ein Programm kann den Port gleichzeitig benutzen; sonst kann sich der Konverter später nicht verbinden.</li>
+  </ol>
+  <h3>4.5 Wenn der Port fehlt oder das Hochladen hängt</h3>
+  <ul>
+    <li>Anderes USB-Kabel probieren (Datenkabel!), anderen USB-Anschluss direkt am PC.</li>
+    <li><b>Doppel-Reset:</b> kurz vor dem Hochladen den Pin <b>RST</b> zweimal schnell mit <b>GND</b> verbinden (Drahtstück). Der Pro Micro bleibt dann 8 Sekunden im Lademodus und bekommt kurz einen eigenen COM-Port. In dieser Zeit „Hochladen“ klicken.</li>
+    <li>Im Windows-Gerätemanager unter „Anschlüsse (COM &amp; LPT)“ nachsehen, welcher Port beim Einstecken dazukommt.</li>
+  </ul>
+</section>
+
+<!-- ================================================================ 5 -->
+<section class="chapter">
+  <h2>5 · Die Diskette (D64) vorbereiten</h2>
+  <p>Ein <b>D64</b> ist das Abbild einer 1541-Diskette als Datei (174 848 Byte). Die Datei <code>serial/hsgser.d64</code> enthält:</p>
+  <div class="cbm">0 "HSG-LINK        " HL 2A
+4    "HSGSER"            PRG     ← Empfang per Kabel
+2    "HSGIMAGE"          PRG     ← Bilder von Diskette anzeigen
+658 BLOCKS FREE.</div>
+  <h3>5.1 Auf die 9096 bringen</h3>
+  <ol>
+    <li><code>hsgser.d64</code> auf die SD-Karte der 9096 kopieren – so wie deine anderen D64-Images (z. B. <code>8032utils.d64</code>).</li>
+    <li>Am CBM das Image auf der 9096 auswählen/mounten, wie du es von dort kennst.</li>
+    <li>Prüfen: <span class="k">DIRECTORY</span> oder <span class="k">LOAD"$",8</span> und <span class="k">LIST</span> zeigt HSGSER und HSGIMAGE.</li>
+  </ol>
+  <div class="box"><b>Echte Floppy statt SD-Karte?</b> Dann muss das D64 mit einem PC-Werkzeug (z. B. OpenCBM mit passendem Adapter) auf eine echte Diskette geschrieben werden. Für die 9096 ist das nicht nötig.</div>
+  <h3>5.2 Eigene D64 mit dem Konverter</h3>
+  <p>Der Konverter kann selbst D64-Images bauen (Kapitel 6.4). Dabei kopiert er auf Wunsch <b>HSGSER</b> und <b>HSGIMAGE</b> automatisch mit hinein – die Häkchen „hsgimage.prg“ und „hsgser.prg“ unter <i>Gewählte Viewer ins D64</i>. Liegt in einem geöffneten D64 eine ältere HSGSER-Version, ersetzt der Konverter sie beim Hinzufügen durch die aktuelle.</p>
+  <h3>5.3 Für Bastler: D64 neu bauen</h3>
+  <p>Wer den Quelltext <code>serial/hsgser.asm</code> ändert, baut so neu (Node.js nötig):</p>
+<pre>node tools/asm6502.js serial/hsgser.asm serial/hsgser.prg
+node tools/test-hsgser.js        (Emulator-Test, 21 Prüfungen)
+node tools/make-d64.js           (schreibt serial/hsgser.d64)</pre>
+</section>
+
+<!-- ================================================================ 6 -->
+<section class="chapter">
+  <h2>6 · Der Konverter im Browser</h2>
+  <h3>6.1 Öffnen</h3>
+  <p><code>hsg-converter.html</code> per Doppelklick öffnen. Ist Chrome oder Edge nicht dein Standardbrowser: Rechtsklick → <b>Öffnen mit</b> → Chrome/Edge, oder die Datei in ein Chrome-Fenster ziehen. Es wird nichts installiert, und kein Bild verlässt deinen PC. Einstellungen merkt sich der Konverter.</p>
+  <h3>6.2 Bild einstellen</h3>
+  <table>
+    <tr><th>Bereich</th><th>Was du einstellst</th></tr>
+    <tr><td><b>Grafikchip</b></td><td><b>EF9366 · 512 × 256</b> (Version B, häufig) oder EF9365 · 512 × 512 (Version A). Welcher Chip auf deinem Board sitzt, steht auf dem großen 40-poligen IC.</td></tr>
+    <tr><td><b>Bild</b></td><td>Bild in das Feld <b>„Bild hierher ziehen“</b> ziehen, mit Strg+V einfügen oder anklicken. Die Vorschau rechts zeigt sofort das Ergebnis.</td></tr>
+    <tr><td><b>Bildanpassung</b></td><td>Einpassen, Füllen (beschneidet) oder Strecken. Mit Zoom und Ziehen in der Vorschau wählst du den Ausschnitt.</td></tr>
+    <tr><td><b>Bildschirm</b></td><td><b>„Laut Datenblatt“ stehen lassen.</b> Das HSG-Bild ist auf dem CBM-Monitor fast quadratisch (≈ 1,05 : 1), nicht breit. Nur so stimmen die Proportionen am echten Gerät.</td></tr>
+    <tr><td><b>Tonwerte</b></td><td>Helligkeit, Kontrast, Gamma, Schärfen. Fotos werden meist besser mit etwas mehr Kontrast.</td></tr>
+    <tr><td><b>Dithering</b></td><td>Wie Graustufen durch Punktmuster dargestellt werden. Floyd-Steinberg oder Atkinson für Fotos, „Schwelle“ für Logos und Strichzeichnungen.</td></tr>
+    <tr><td><b>Ausgabeformat</b></td><td>Für HSG-Link und HSGIMAGE nichts ändern (Rohdaten, PRG).</td></tr>
+  </table>
+  <h3>6.3 An den CBM senden (HSG-Link)</h3>
+  <ol>
+    <li>Am CBM muss HSGSER laufen (Kapitel 7).</li>
+    <li>Im Kasten <b>„An CBM senden · HSG-Link“</b> auf <b>Verbinden …</b> klicken. Chrome/Edge zeigt eine Liste: <b>Arduino Leonardo (COMx)</b> wählen → <i>Verbinden</i>. Meldung: „HSGLINK 1.0 bereit“.</li>
+    <li><b>Bild senden</b> klicken. Der Balken zeigt den Fortschritt, der CBM meldet „BILD EMPFANGEN“.</li>
+    <li><b>Live</b> anhaken: Jede Änderung an den Reglern wird automatisch geschickt – nur das geänderte Rechteck.</li>
+    <li><b>Löschen</b> leert den HSG-Bildschirm. <b>Viewer beenden</b> beendet HSGSER, der CBM ist wieder in BASIC.</li>
+  </ol>
+  <h3>6.4 In ein D64 schreiben (ohne Kabel)</h3>
+  <ol>
+    <li>Rechts unter <b>Disk-Image</b>: <b>Neues D64</b> oder <b>D64 öffnen …</b>.</li>
+    <li>Unter <b>In D64 schreiben</b> einen Dateinamen eingeben (max. 16 Zeichen) → <b>Zum D64 hinzufügen</b>.</li>
+    <li><b>D64 herunterladen</b> → Datei auf die SD-Karte der 9096 kopieren. Anzeigen am CBM mit HSGIMAGE (Kapitel 8).</li>
+  </ol>
+</section>
+
+<!-- ================================================================ 7 -->
+<section class="chapter">
+  <h2>7 · Inbetriebnahme am CBM</h2>
+  <h3>7.1 Anschließen</h3>
+  <ol>
+    <li>CBM <b>ausschalten</b>.</li>
+    <li>Stecker auf die mittlere Kante stecken, <b>A links</b>, Lötösen zeigen zu dir. Gerade aufschieben, nicht verkanten. Das grün-gelbe Massekabel innen hinter der Kante nicht einklemmen.</li>
+    <li>Pro Micro per USB am PC. Den <b>HSG-Umschalter</b> am Gehäuse auf <b>Mittelstellung</b> (siehe 7.3).</li>
+    <li>CBM einschalten. Er meldet sich wie gewohnt.</li>
+  </ol>
+  <h3>7.2 HSGSER starten</h3>
+  <div class="cbm">SYS 40960
+GRAPHIC REV. ....
+READY.
+LOAD "HSGSER",8
+SEARCHING FOR HSGSER
+LOADING
+READY.
+RUN
+HSGSER - HSG-LINK EMPFAENGER
+WARTE AUF DATEN, STOP = ENDE
+D/LEER = GRAFIK AUF CBM-SCHIRM AN/AUS</div>
+  <p><span class="k">SYS 40960</span> schaltet die Grafikbefehle des HSG-ROMs ein und muss nach jedem Einschalten einmal eingegeben werden. Jetzt im Konverter <b>Verbinden …</b> und <b>Bild senden</b> (Kapitel 6.3).</p>
+  <h3>7.3 Welcher Bildschirm zeigt das Bild?</h3>
+  <table>
+    <tr><th>HSG-Umschalter</th><th>Eingebauter CBM-Bildschirm</th><th>Externer Monitor (DIN-Buchse)</th></tr>
+    <tr><td>1 · vorn</td><td>immer Text</td><td rowspan="3">zeigt <b>immer</b> die Grafik</td></tr>
+    <tr><td><b>2 · Mitte</b></td><td><b>Taste D oder LEER</b> schaltet Grafik an/aus</td></tr>
+    <tr><td>3 · hinten</td><td>immer Grafik</td></tr>
+  </table>
+  <p>Mit der Taste <b>D</b> oder <b>LEER</b> holst du das Bild zusätzlich auf den eingebauten Bildschirm und wieder weg. Das Zurückschalten auf Text dauert laut Handbuch etwa 3 Sekunden, bis der Monitor wieder synchron ist. Die Einstellung bleibt erhalten, wenn neue Bilder ankommen.</p>
+  <h3>7.4 Beenden</h3>
+  <ul>
+    <li>Im Konverter <b>Viewer beenden</b> – oder am CBM die Taste <b>STOP</b>.</li>
+    <li>HSGSER schaltet den CBM-Bildschirm automatisch zurück auf Text und meldet „ENDE“ bzw. „ABBRUCH“. Das Bild bleibt im HSG-Speicher und auf dem externen Monitor stehen.</li>
+  </ul>
+  <h3>7.5 Meldungen am CBM</h3>
+  <table>
+    <tr><th>Meldung</th><th>Bedeutung</th></tr>
+    <tr><td>BILD EMPFANGEN</td><td>Vollbild fertig gezeichnet, Prüfsumme stimmt.</td></tr>
+    <tr><td>PRUEFSUMMENFEHLER</td><td>Ein Byte kam falsch an. Nochmal senden; bleibt es: Lötstellen und Widerstände prüfen.</td></tr>
+    <tr><td>UNBEKANNTER BEFEHL</td><td>Störung auf der Leitung; HSGSER synchronisiert sich beim nächsten Rahmen selbst neu.</td></tr>
+    <tr><td>GELOESCHT / ENDE / ABBRUCH</td><td>„Löschen“, „Viewer beenden“ bzw. STOP ausgeführt.</td></tr>
+  </table>
+</section>
+
+<!-- ================================================================ 8 -->
+<section>
+  <h2 style="margin-top:20pt">8 · Bilder ohne Kabel: HSGIMAGE</h2>
+  <p>HSGIMAGE (von AndyG) lädt fertige Bilddateien von Diskette und zeigt sie an. So bringst du Bilder auch ohne PC auf den Schirm.</p>
+  <div class="cbm">SYS 40960
+LOAD "HSGIMAGE",8
+RUN
+HSG IMAGE LOADER - JULY 2024
+ENTER FILENAME ? BILD</div>
+  <p>„BILD“ steht für den Namen, den du der Bilddatei im Konverter gegeben hast. Die Bilddateien erzeugst du mit dem Konverter (Kapitel 6.4); <code>hsgser.d64</code> selbst enthält keine Bilder, die Original-Disk <code>hsgimage.d64</code> z. B. „PANDA“. Format: Rohdaten ohne Ladeadresse, 64 Byte je Zeile, oberste Zeile zuerst – 16 384 Byte (65 Blöcke) für EF9366, 32 768 Byte (130 Blöcke) für EF9365.</p>
+
+  <h2 style="margin-top:20pt">9 · Fehlersuche</h2>
+  <table>
+    <tr><th>Problem</th><th>Ursache und Abhilfe</th></tr>
+    <tr><td>Konverter: „Der CBM quittiert nicht“ / Pro Micro meldet <code>E TIMEOUT</code></td><td>HSGSER läuft nicht (erst <span class="k">RUN</span>), Stecker verdreht (A muss links sein), B und M vertauscht (weiß → 10 ist B, weiß markiert → 16 ist M), Masse fehlt.</td></tr>
+    <tr><td>„Verbinden …“ zeigt keinen Pro Micro</td><td>Anderes USB-Kabel, Seriellen Monitor der Arduino IDE schließen, Seite in Chrome/Edge öffnen (nicht Firefox).</td></tr>
+    <tr><td>„Web Serial fehlt“</td><td>Falscher Browser. Chrome oder Edge am PC verwenden.</td></tr>
+    <tr><td>Bild ist verschoben / Streifen</td><td>Eine Datenleitung C–L ist vertauscht oder unterbrochen. Mit Durchgangsprüfung (3.4, Schritt 6) suchen.</td></tr>
+    <tr><td>Bild wirkt am CBM gestaucht oder gestreckt</td><td>Im Konverter unter <b>Bildschirm</b> „Laut Datenblatt“ wählen. Falls dein Monitor anders eingestellt ist: „Eigene Messung …“ mit den gemessenen cm.</td></tr>
+    <tr><td>Bild nur halb so hoch / doppelt</td><td>Falscher Chip im Konverter gewählt (EF9365 ↔ EF9366).</td></tr>
+    <tr><td>Taste D bewirkt nichts</td><td>HSG-Umschalter nicht in Mittelstellung.</td></tr>
+    <tr><td>Dunkler Schirm nach Einschalten</td><td>HSG-Umschalter steht auf 3 (Grafik). Auf 1 stellen, ca. 3 s warten.</td></tr>
+    <tr><td>?SYNTAX ERROR bei SYS / LOAD</td><td>Tippfehler; Anführungszeichen beachten: <span class="k">LOAD "HSGSER",8</span>.</td></tr>
+    <tr><td>?FILE NOT FOUND</td><td>hsgser.d64 nicht gemountet oder falsches Laufwerk (Adresse 8).</td></tr>
+    <tr><td>Ton beim Übertragen</td><td>Normal, siehe Kapitel 1.</td></tr>
+  </table>
+</section>
+
+<!-- ================================================================ 10 -->
+<section class="chapter">
+  <h2>10 · Anhang</h2>
+  <h3>10.1 Komplette Userport-Belegung (J2)</h3>
+  <table><thead><tr><th>Kontakt</th><th>Signal</th><th>HSG-Link</th><th>Kontakt</th><th>Signal</th><th>HSG-Link</th></tr></thead><tbody id="full"></tbody></table>
+  <p class="sub">Quelle: Commodore-Schaltplan 8032029, Blatt 3 („Cassette &amp; Keyboard“), Stecker J2 „USER PORT“ am VIA UB15 (6522); Kontakt 4 auf Blatt 2. Lage von A: O. Seibert „PIA and VIA info (PET)“, Compute! Nr. 19, eigenes Foto der Rückseite.</p>
+  <h3>10.2 Wie die Übertragung funktioniert</h3>
+  <p>Der Pro Micro legt ein Byte an PA0–PA7 und erzeugt eine fallende Flanke an <b>CA1</b>. HSGSER liest das Byte und schaltet <b>CB2</b> um („erhalten“). Erst dann kommt das nächste Byte; nach 3 s ohne Antwort meldet der Pro Micro einen Fehler. Jeder Datenblock beginnt mit „HSG“, einem Befehlsbuchstaben und endet mit einer Prüfsumme:</p>
+  <table>
+    <tr><th>Befehl</th><th>Inhalt</th><th>Wirkung</th></tr>
+    <tr><td><code>I</code></td><td>Zeilenzahl, dann Zeilen × 64 Byte</td><td>Bildschirm löschen, Bild zeichnen</td></tr>
+    <tr><td><code>P</code></td><td>Spalte, Zeile, Breite, Höhe, dann die Bytes</td><td>Rechteck setzen und radieren (Live)</td></tr>
+    <tr><td><code>C</code></td><td>–</td><td>Bildschirm löschen</td></tr>
+    <tr><td><code>Q</code></td><td>–</td><td>HSGSER beenden</td></tr>
+  </table>
+  <h3>10.3 Speicher und ROM</h3>
+  <p class="sub">HSGSER liegt ab $0401 (Start mit SYS 1040, 875 Byte). Benutzte HSG-ROM-Routinen: $AED0 Init (nur beim Start), $AEDC Display (Taste D). Grafikprozessor-Register $AF70–$AF7F; Userport-VIA $E840 (Port A $E841, PCR $E84C). CA2 (Zeichensatz-Umschaltung) bleibt unverändert.</p>
+  <h3>10.4 Checkliste</h3>
+  <ul class="check">
+    <li>Teile da, Pro Micro ist die 5-V-Version</li>
+    <li>Kabel gelötet, Durchgang geprüft, obere Reihe frei, keine +5-V-Verbindung</li>
+    <li>Sketch aufgespielt, Serieller Monitor zeigt HSGLINK 1.0 – und ist wieder geschlossen</li>
+    <li>hsgser.d64 auf der SD-Karte und gemountet</li>
+    <li>CBM aus → Stecker auf mittlere Kante, A links → CBM an</li>
+    <li>Umschalter Mitte · <span class="k">SYS 40960</span> · <span class="k">LOAD "HSGSER",8</span> · <span class="k">RUN</span></li>
+    <li>Konverter: Chip wählen · Bild hineinziehen · Verbinden … · Bild senden</li>
+    <li>Taste D: Bild auch auf dem CBM-Schirm</li>
+  </ul>
+</section>
+
+<script>
+/*__DRAWINGS__*/
+</script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+# lokale Dateien, nicht ins Repository
+*.zip
+.claude/
+_*
+node_modules/

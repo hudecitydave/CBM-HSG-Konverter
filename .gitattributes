@@ -1,0 +1,7 @@
+* text=auto
+*.prg binary
+*.d64 binary
+*.bin binary
+*.pdf binary
+*.png binary
+*.jpg binary
