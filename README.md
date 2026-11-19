@@ -45,6 +45,8 @@ Alles läuft auf dem Original-CBM, ohne Umbauten am Rechner: Eine Website bereit
 
 ## Schnellstart
 
+> 📘 **Alles zum Ausdrucken:** die **[Komplett-Anleitung (PDF, 14 Seiten)](CBM-HSG-Komplett-Anleitung.pdf)** mit allen Anwendungsfällen, Tastenübersicht, Fehlersuche und Anhang. Für den Bau des HSG-Link-Kabels gibt es zusätzlich die **[HSG-Link-Anleitung](HSG-Link-Anleitung.pdf)**.
+
 1. **[`hsg-converter.html`](hsg-converter.html)** im Browser öffnen und ein Foto hineinziehen.
 2. Oben links bei **Grafikchip** den Chip deines Boards wählen und bei **Ausgabe** das Ziel.
 3. **D64 herunterladen**, auf die SD-Karte bzw. Diskette bringen. Oder gleich die fertige Diskette [`cbm/hsgmenu.d64`](cbm/hsgmenu.d64) nehmen, darauf liegen Programm und Testbilder.
@@ -263,8 +265,9 @@ Details zur Belegung: [`serial/README.md`](serial/README.md#verdrahtung).
 
 ```
 hsg-converter.html        Website: Konverter, HSG-Link, Plot- und 8028-Vorschau, D64-Verwaltung
+CBM-HSG-Komplett-Anleitung.pdf  Komplett-Anleitung: alle Anwendungsfälle, Tasten, Fehlersuche, Anhang
 HSG-Link-Anleitung.pdf    Anleitung HSG-Link (Kabel, Installation, Inbetriebnahme)
-anleitung/                Quelle der Anleitung (HTML)
+anleitung/                Quellen beider Anleitungen (HTML); PDF bauen: node tools/build-komplett.js
 cbm/                      CBM-Programme, Disketten, Testbilder, Emulationstests  → cbm/README.md
   hsgmenu.asm/.prg/.d64     Hauptprogramm mit Menü (Diskette, HSG-Link, Plotter)
   hsgplot.*                 Einzelprogramm: HSG-Link + Plotter

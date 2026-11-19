@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>CBM-HSG-Konverter – Komplett-Anleitung</title>
+<style>
+@page { size: A4; margin: 16mm 15mm 18mm 15mm;
+  @bottom-center { content: "CBM-HSG-Konverter · Komplett-Anleitung · Seite " counter(page) " von " counter(pages); font: 8pt system-ui, "Segoe UI", sans-serif; color: #777; } }
+@page :first { @bottom-center { content: none; } }
+:root { --ink:#1b1f1a; --muted:#5d665a; --line:#cfd5cb; --acc:#1d5e2e; --warn:#9a4500; }
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; color: var(--ink); font: 10pt/1.45 "Segoe UI", system-ui, sans-serif; }
+h1 { font-size: 22pt; margin: 0 0 4pt; color: var(--acc); }
+h2 { font-size: 15pt; margin: 0 0 8pt; padding-bottom: 3pt; border-bottom: 2px solid var(--acc); color: var(--acc); break-after: avoid; }
+h3 { font-size: 11.5pt; margin: 12pt 0 4pt; break-after: avoid; }
+p { margin: 0 0 6pt; }
+.chapter { break-before: page; }
+ol, ul { margin: 2pt 0 8pt 16pt; padding: 0; } li { margin: 2pt 0; }
+table { border-collapse: collapse; width: 100%; margin: 4pt 0 8pt; font-variant-numeric: tabular-nums; break-inside: avoid; }
+th, td { border-bottom: 1px solid var(--line); padding: 3pt 5pt; text-align: left; vertical-align: top; }
+th { font-size: 8pt; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); }
+code, .k { font-family: Consolas, "Courier New", monospace; background: #eef1ea; padding: 0 3pt; border-radius: 3px; font-size: 9.2pt; }
+pre { font-family: Consolas, monospace; background: #f1f3ee; border: 1px solid var(--line); padding: 6pt 8pt; border-radius: 5px; font-size: 9pt; margin: 4pt 0 8pt; break-inside: avoid; white-space: pre-wrap; }
+.box { border: 1px solid var(--line); border-left: 4px solid var(--acc); background: #f4f8f2; padding: 6pt 9pt; border-radius: 4px; margin: 6pt 0 9pt; break-inside: avoid; }
+.warn { border-left-color: var(--warn); background: #fff4e8; }
+.warn b.t { color: var(--warn); }
+.cbm { font-family: Consolas, monospace; background: #0b1a0d; color: #6dff86; padding: 6pt 9pt; border-radius: 5px; margin: 4pt 0 8pt; white-space: pre; font-size: 9.5pt; break-inside: avoid; }
+.sub { color: var(--muted); font-size: 8.8pt; }
+.fig { break-inside: avoid; margin: 6pt 0 10pt; text-align: center; }
+.fig img { max-width: 100%; border-radius: 4px; }
+.cap { color: var(--muted); font-size: 8.5pt; margin-top: 3pt; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10pt; align-items: start; }
+.title-page { height: 255mm; display: flex; flex-direction: column; justify-content: center; }
+.title-page .big { font-size: 32pt; font-weight: 800; color: var(--acc); line-height: 1.05; }
+.title-page .tag { font-size: 13pt; margin: 8pt 0 14pt; }
+.toc { columns: 2; column-gap: 18pt; font-size: 10pt; }
+.toc div { break-inside: avoid; margin: 1pt 0; }
+.uc { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6pt; margin: 6pt 0 10pt; }
+.uc div { border: 1px solid var(--acc); border-radius: 6px; padding: 5pt 6pt; background: #f4f8f2; font-size: 9pt; }
+.uc b { display: block; color: var(--acc); font-size: 10pt; }
+</style>
+</head>
+<body>
+
+<!-- ================================================================ Titel -->
+<section class="title-page">
+  <div class="sub">Commodore CBM 8032 / 4032 · HSG/LSG-Board (EF9365 / EF9366)</div>
+  <div class="big">CBM-HSG-Konverter</div>
+  <div class="tag">Fotos auf den HSG-Bildschirm, live vom PC, auf den HP-Plotter<br>und auf den Typenraddrucker CBM 8028 – die komplette Anleitung</div>
+  <div class="fig"><img src="../docs/bilder/cbm-bildschirm-blues.jpg" style="width:100%"></div>
+  <div class="uc">
+    <div><b>1 · Lokal am CBM</b>Bild am PC aufbereiten, auf Diskette, am CBM laden</div>
+    <div><b>2 · Mit Serial</b>Bilder live vom PC über USB und den Userport (HSG-Link)</div>
+    <div><b>3 · Plotten</b>Das angezeigte Bild als Schraffur auf einen HP-Plotter</div>
+    <div><b>4 · Drucken</b>Textgrafik auf dem Typenraddrucker CBM 8028</div>
+  </div>
+  <div class="toc">
+    <div>1 · Überblick</div>
+    <div>2 · Was du brauchst</div>
+    <div>3 · Erste Schritte am CBM</div>
+    <div>4 · Die Website</div>
+    <div>5 · Anwendungsfall 1: Lokal am CBM</div>
+    <div>6 · Anwendungsfall 2: Mit Serial (HSG-Link)</div>
+    <div>7 · Anwendungsfall 3: Plotten</div>
+    <div>8 · Anwendungsfall 4: Drucken auf dem 8028</div>
+    <div>9 · HSGMENU: alle Tasten</div>
+    <div>10 · Fehlersuche</div>
+    <div>11 · Anhang</div>
+  </div>
+  <p class="sub" style="margin-top:14pt">Stand 19.11.2026. Diese Anleitung fasst alles zusammen. Für den Bau des HSG-Link-Kabels gibt es zusätzlich die ausführliche <b>HSG-Link-Anleitung</b> (HSG-Link-Anleitung.pdf) mit Lötplan.</p>
+</section>
+
+<!-- ================================================================ 1 -->
+<section class="chapter">
+  <h2>1 · Überblick</h2>
+  <p>Das HSG-Board („Hochauflösende Grafik“ von Commodore Deutschland, nachgebaut als LSG) zeigt 512 × 256 Punkte (EF9366) oder 512 × 512 Punkte (EF9365) in Schwarz-Weiß. Dieses Projekt bringt beliebige Fotos auf dieses Board und von dort aufs Papier.</p>
+  <h3>Die Bausteine</h3>
+  <table>
+    <tr><th>Teil</th><th>Was es tut</th><th>Wo</th></tr>
+    <tr><td><b>Website</b> <code>hsg-converter.html</code></td><td>Bild aufbereiten (Ausschnitt, Tonwerte, Dithering), Vorschau, D64-Disketten zusammenstellen, Bilder per HSG-Link senden, Plot- und Druckvorschau</td><td>PC, Browser</td></tr>
+    <tr><td><b>HSGMENU</b></td><td>Hauptprogramm am CBM: Menü mit „1 = Bild von Diskette“ und „2 = HSG-Link“, in beiden Fällen mit Plotten</td><td>CBM</td></tr>
+    <tr><td>HSGIMAGE</td><td>Original-Loader von AndyG: Bild von Diskette anzeigen</td><td>CBM</td></tr>
+    <tr><td>HSGSER</td><td>Reiner HSG-Link-Empfänger ohne Plotter</td><td>CBM</td></tr>
+    <tr><td>HSGPLOT, DIREKTPLOT</td><td>Einzelprogramme (HSG-Link + Plotter bzw. Diskette + Plotter), Inhalt wie HSGMENU</td><td>CBM</td></tr>
+    <tr><td>DRUCK8028</td><td>Schickt eine Textgrafik-Datei an den Typenraddrucker</td><td>CBM</td></tr>
+    <tr><td><b>HSG-Link</b></td><td>Arduino Pro Micro + Kabel: USB vom PC auf den Userport des CBM</td><td>Hardware</td></tr>
+  </table>
+  <h3>Welcher Weg für welchen Zweck?</h3>
+  <table>
+    <tr><th>Du willst …</th><th>Weg</th><th>Kapitel</th></tr>
+    <tr><td>Bilder vorbereiten und ohne PC-Verbindung am CBM zeigen</td><td>Website → D64 → Floppy → HSGMENU, Taste 1</td><td>5</td></tr>
+    <tr><td>Bilder direkt vom PC zeigen, Ausschnitt und Helligkeit live probieren</td><td>Website → HSG-Link → HSGMENU, Taste 2</td><td>6</td></tr>
+    <tr><td>Das Bild auf Papier zeichnen</td><td>wie 1 oder 2, dann Taste S, K oder P/H</td><td>7</td></tr>
+    <tr><td>Das Bild als Textgrafik drucken</td><td>Website (Ausgabe „Drucker 8028“) → D64 → DRUCK8028</td><td>8</td></tr>
+  </table>
+  <div class="fig"><img src="../docs/bilder/vorschau-blues-schraffur.png" style="width:100%"><div class="cap">Links das Bild am HSG-Schirm, in der Mitte als Kringel-Plot, rechts als Schraffur-Plot (Simulation).</div></div>
+</section>
+
+<!-- ================================================================ 2 -->
+<section class="chapter">
+  <h2>2 · Was du brauchst</h2>
+  <h3>Immer</h3>
+  <ul>
+    <li><b>CBM 8032 oder 4032</b> mit BASIC 4 und <b>32 KByte RAM</b>. Der Schraffur-Modus nutzt den Speicher bis <code>$5FFF</code>.</li>
+    <li><b>HSG- oder LSG-Board</b> mit EF9365 (Version A, 512 × 512, flimmert ohne nachleuchtenden Monitor) oder EF9366 (Version B, 512 × 256, flimmerfrei).</li>
+    <li>Ein <b>Laufwerk am IEEE-488-Bus</b>, z. B. ein SD-Laufwerk wie petSD+ bzw. CBM-D9096 (D64-Dateien direkt von der SD-Karte) oder eine echte Floppy wie 8050/8250 (D64 vorher auf Diskette übertragen).</li>
+    <li>Ein <b>PC</b> mit Chrome oder Edge. Die Website läuft auch offline, sie ist eine einzelne Datei.</li>
+  </ul>
+  <h3>Je nach Anwendungsfall</h3>
+  <table>
+    <tr><th>Für</th><th>Teil</th><th>Hinweis</th></tr>
+    <tr><td>HSG-Link</td><td>Arduino <b>Pro Micro 5 V / 16 MHz</b> (ATmega32U4), 10 × Widerstand 470 Ω, Userport-Stecker 2 × 12 Kontakte (Raster 3,96 mm, wie C64-Userport), Kabel</td><td>Bauanleitung: HSG-Link-Anleitung.pdf</td></tr>
+    <tr><td>Plotten</td><td><b>HP-Plotter mit HP-GL</b> und IEEE-488 (HP-IB), z. B. HP 7470A oder 7475A</td><td>Werksadresse meist 5</td></tr>
+    <tr><td>Drucken</td><td><b>Typenraddrucker CBM 8028</b> mit IEEE-Interface</td><td>Adresse ab Werk 4</td></tr>
+  </table>
+  <h3>Software</h3>
+  <p>Alles liegt im Repository. Fertige Disketten:</p>
+  <table>
+    <tr><th>Diskette</th><th>Inhalt</th></tr>
+    <tr><td><code>cbm/hsgmenu.d64</code> „HSG-MENU“</td><td>HSGMENU, DRUCK8028, 8028TEST, Testbilder BLUES512/256, FOTO512/256, TEST512/256</td></tr>
+    <tr><td><code>serial/hsgser.d64</code> „HSG-LINK“</td><td>HSGSER und HSGIMAGE</td></tr>
+    <tr><td><code>cbm/hsgplot.d64</code>, <code>cbm/direktplot.d64</code></td><td>die Einzelprogramme</td></tr>
+  </table>
+  <p>Testbilder mit „512“ sind für den EF9365, mit „256“ für den EF9366.</p>
+</section>
+
+<!-- ================================================================ 3 -->
+<section class="chapter">
+  <h2>3 · Erste Schritte am CBM</h2>
+  <h3>Anschlüsse</h3>
+  <div class="fig"><img src="../docs/bilder/hsg-link-pro-micro.jpg" style="width:85%"><div class="cap">Rückseite des 8032-32 B, von hinten gesehen. Grauer Stecker rechts: IEEE-488 (Floppy, Plotter, Drucker). Blauer Stecker in der Mitte: Userport mit dem HSG-Link-Kabel. Links: Kassettenschnittstelle.</div></div>
+  <ul>
+    <li><b>IEEE-488</b>: Floppy, Plotter und Drucker hängen hintereinander an diesem einen Anschluss. Jedes Gerät braucht eine eigene Adresse.</li>
+    <li><b>Userport</b>: nur für HSG-Link. Von hinten gesehen liegen Kontakt 1 und A links.</li>
+  </ul>
+  <h3>Programm starten</h3>
+  <p>Diskette bzw. D64 einlegen, dann:</p>
+  <div class="cbm">sys 40960
+load "hsgmenu",8
+run</div>
+  <p><code>sys 40960</code> aktiviert das ROM des HSG-Boards. Danach erscheint das Menü:</p>
+  <div class="cbm">HSGMENU - HSG-BOARD: BILDER ANZEIGEN UND PLOTTEN
+
+1 = NUR CBM (DIREKTPLOT): BILD VON DISKETTE LADEN
+2 = MIT SERIAL (HSG-LINK): BILDER VOM PC
+E = ENDE
+
+WAHL ?</div>
+  <p>Das Programm erkennt selbst, ob ein EF9365 oder EF9366 eingebaut ist. <b>E</b> oder <b>STOP</b> im Menü beendet es.</p>
+  <div class="box"><b>Plotter-Einstellungen</b> (Adresse, Größe, Helligkeit) stehen fest im Programm. Die Website schreibt sie dir passend ins HSGMENU auf dem D64 (Kapitel 7). Wer lieber am CBM einstellt, kann sie nach dem <code>load</code> und vor dem <code>run</code> per POKE ändern (Anhang A).</div>
+</section>
+
+<!-- ================================================================ 4 -->
+<section class="chapter">
+  <h2>4 · Die Website</h2>
+  <p><code>hsg-converter.html</code> im Browser öffnen. Ein Server oder eine Installation ist nicht nötig. Bild hineinziehen, einfügen (Strg+V) oder anklicken.</p>
+  <table>
+    <tr><th>Bereich</th><th>Einstellungen</th></tr>
+    <tr><td><b>Ausgabe</b></td><td>HSG-Bildschirm (Standard) · Plotter · Drucker CBM 8028. Schaltet die passenden Vorschauen und Karten ein.</td></tr>
+    <tr><td><b>Grafikchip</b></td><td>EF9366 (512 × 256) oder EF9365 (512 × 512). Bestimmt die Dateigröße (65 bzw. 130 Blöcke).</td></tr>
+    <tr><td><b>Bildanpassung</b></td><td>Füllen (beschneiden), ganz zeigen oder strecken. Bildschirm „laut Datenblatt“ (Bild ≈ 1,05 : 1) oder eigene Messung. Zoom per Regler oder Mausrad, Ausschnitt mit der Maus ziehen.</td></tr>
+    <tr><td><b>Tonwerte</b></td><td>Auto-Kontrast, Helligkeit, Kontrast, Gamma, Schärfen</td></tr>
+    <tr><td><b>Dithering</b></td><td>Atkinson (Vorgabe, klar und kontrastreich), Floyd-Steinberg, Jarvis-Judice-Ninke, Bayer 4 × 4/8 × 8, reine Schwelle. Dazu Schwelle, Fehlerstärke, Serpentine.</td></tr>
+    <tr><td><b>Ausgabeformat</b></td><td>Negativ, Bitfolge, Zeilenrichtung, Dateityp, Ladeadresse. Die Vorgabe passt für alle Programme hier.</td></tr>
+    <tr><td><b>HSG-Link</b></td><td>Verbinden, Bild senden, Löschen, Viewer beenden, Live</td></tr>
+    <tr><td><b>Disk-Image</b></td><td>D64 öffnen, neu anlegen, herunterladen. Dateien ansehen (Klick), löschen. Programme HSGMENU, HSGIMAGE, HSGSER hinzufügen.</td></tr>
+  </table>
+  <div class="box"><b>Tipp für Fotos:</b> Gesichter füllen lassen (Zoom), Auto-Kontrast an, Atkinson. Die obere Vorschau zeigt genau das, was am CBM erscheint, mit dem richtigen Seitenverhältnis des Monitors.</div>
+  <p>Einstellungen und das aktuelle D64 merkt sich der Browser beim nächsten Öffnen.</p>
+  <div class="fig"><img src="../docs/bilder/cbm-bildschirm-schriftzug.jpg" style="width:70%"><div class="cap">Auch Schriftzüge und Grafiken funktionieren.</div></div>
+</section>
+
+<!-- ================================================================ 5 -->
+<section class="chapter">
+  <h2>5 · Anwendungsfall 1: Lokal am CBM</h2>
+  <p>Ohne Kabel zum PC. Die Bilder werden am PC vorbereitet und kommen per Diskette bzw. SD-Karte zum CBM.</p>
+  <h3>Am PC</h3>
+  <ol>
+    <li>Website öffnen, <b>Ausgabe: HSG-Bildschirm</b>, den richtigen <b>Grafikchip</b> wählen.</li>
+    <li>Bild hineinziehen und einstellen, bis die Vorschau gefällt.</li>
+    <li>Rechts unter <b>In D64 schreiben</b> einen Dateinamen eingeben (max. 16 Zeichen) und <b>Zum D64 hinzufügen</b> klicken. Für weitere Bilder wiederholen.</li>
+    <li>Bei <b>Disk-Image</b>: Ein neues D64 enthält auf Wunsch schon HSGMENU, HSGIMAGE und HSGSER. <b>D64 herunterladen</b>.</li>
+    <li>Die D64-Datei auf die SD-Karte kopieren (SD-Laufwerk) oder auf eine echte Diskette übertragen.</li>
+  </ol>
+  <h3>Am CBM</h3>
+  <ol>
+    <li><code>sys 40960</code>, <code>load "hsgmenu",8</code>, <code>run</code>, Taste <b>1</b>.</li>
+    <li>Bei <code>ENTER FILENAME ?</code> den Namen eingeben und RETURN drücken. Das Bild baut sich Zeile für Zeile auf.</li>
+    <li>Die Frage <code>PLOTTEN? S=SCHRAFFUR K=KRINGEL P=PUNKTE N=NEIN</code> mit <b>N</b> beantworten, wenn kein Plotter dran ist. Dann kommt der nächste Dateiname.</li>
+    <li>Nur <b>RETURN</b> beim Dateinamen führt zurück ins Menü.</li>
+  </ol>
+  <p>Gibt es die Datei nicht, meldet das Programm <code>FILE NOT FOUND ERROR</code> und fragt erneut. Laden und Anzeigen ist der Originalcode des HSG Image Loaders von AndyG. HSGIMAGE allein verhält sich genauso: <code>load "hsgimage",8</code>, <code>run</code>.</p>
+  <div class="fig"><img src="../docs/bilder/cbm-zwei-monitore.jpg" style="width:80%"><div class="cap">Ein Foto auf dem HSG-Board, hier auf zwei Monitoren gleichzeitig.</div></div>
+</section>
+
+<!-- ================================================================ 6 -->
+<section class="chapter">
+  <h2>6 · Anwendungsfall 2: Mit Serial (HSG-Link)</h2>
+  <p>Die Website schickt das Bild per USB an den Pro Micro, der es Byte für Byte über den Userport an den CBM gibt. Mit <b>Live</b> erscheint jede Änderung nach einem Augenblick auf dem CBM, übertragen wird nur das geänderte Rechteck.</p>
+  <div class="two">
+    <div class="fig"><img src="../docs/bilder/hsg-link-pro-micro.jpg"><div class="cap">Pro Micro mit 470-Ω-Widerständen am Userport</div></div>
+    <div class="fig"><img src="../docs/bilder/hsgser-empfang.jpg"><div class="cap">Der Empfänger meldet jedes Bild</div></div>
+  </div>
+  <h3>Hardware (Kurzfassung)</h3>
+  <table>
+    <tr><th>Pro Micro</th><th>470 Ω</th><th>Userport</th><th>Signal</th></tr>
+    <tr><td>2 … 9</td><td>✓</td><td>C D E F H J K L</td><td>PA0 … PA7 (Daten)</td></tr>
+    <tr><td>10</td><td>✓</td><td>B</td><td>CA1 (Strobe)</td></tr>
+    <tr><td>16</td><td>✓</td><td>M</td><td>CB2 (Quittung)</td></tr>
+    <tr><td>GND</td><td>–</td><td>A und N</td><td>Masse</td></tr>
+  </table>
+  <div class="box warn"><b class="t">Wichtig:</b> Die 5-V-Leitung des Userports bleibt frei. Der Pro Micro bekommt seinen Strom über USB. Lötplan, Teile-Liste und Messtest stehen in der HSG-Link-Anleitung.</div>
+  <h3>Pro Micro programmieren</h3>
+  <ol>
+    <li>Arduino-IDE, Board <b>„Arduino Leonardo“</b>, Sketch <code>serial/HSGLink/HSGLink.ino</code> hochladen.</li>
+    <li>Im seriellen Monitor erscheint <code>HSGLINK 1.0</code>.</li>
+  </ol>
+  <h3>Benutzung</h3>
+  <ol>
+    <li>Am CBM: <code>load "hsgmenu",8</code>, <code>run</code>, Taste <b>2</b>. Es erscheint „Warte auf Daten“.</li>
+    <li>Website in Chrome/Edge: rechts <b>HSG-Link → Verbinden …</b>, den Pro Micro wählen. „HSGLINK 1.0 bereit“ erscheint.</li>
+    <li><b>Bild senden</b>, oder <b>Live</b> einschalten und am Bild drehen.</li>
+  </ol>
+  <table>
+    <tr><th>Taste am CBM</th><th>Wirkung</th></tr>
+    <tr><td><b>D</b> oder <b>LEER</b></td><td>Grafik zusätzlich auf den eingebauten Schirm und zurück (HSG-Umschalter in Mittelstellung)</td></tr>
+    <tr><td><b>S</b>, <b>K</b>, <b>H</b></td><td>das angezeigte Bild plotten (Kapitel 7). Während einer Übertragung gedrückt: Plot startet, sobald das Bild fertig ist</td></tr>
+    <tr><td><b>STOP</b></td><td>zurück ins Menü. „Viewer beenden“ auf der Website tut dasselbe</td></tr>
+  </table>
+</section>
+
+<!-- ================================================================ 7 -->
+<section class="chapter">
+  <h2>7 · Anwendungsfall 3: Plotten</h2>
+  <p>Das gerade angezeigte Bild wird vom HSG-Board zurückgelesen und als HP-GL über den IEEE-Bus an den Plotter geschickt. Es ist egal, ob es von Diskette (Menü 1) oder über HSG-Link (Menü 2) kam.</p>
+  <h3>Anschließen</h3>
+  <ul>
+    <li>Plotter zusätzlich zur Floppy an den IEEE-Bus, eigene Adresse (Werkseinstellung bei HP meist <b>5</b>).</li>
+    <li>Papier A4 quer einlegen, Stift in Halter 1.</li>
+  </ul>
+  <h3>Die drei Modi</h3>
+  <table>
+    <tr><th>Taste</th><th>Modus</th><th>Wie</th><th>Wofür</th></tr>
+    <tr><td><b>S</b></td><td><b>Schraffur</b></td><td>bis zu 4 Linienlagen (— | / \) je 4 × 4-Fläche, je dunkler, desto mehr Lagen</td><td><b>Fotos</b> – die erste Wahl</td></tr>
+    <tr><td><b>K</b></td><td>Kringel</td><td>eine durchgehende Zickzacklinie je Band</td><td>sehr wenig Stiftabsetzen, wirkt flauer</td></tr>
+    <tr><td><b>P</b> / <b>H</b></td><td>Punkte</td><td>jede Punktfolge einer Zeile als Strich</td><td>Strichzeichnungen</td></tr>
+  </table>
+  <p>Ab Werk zeichnet der Plotter die <b>dunklen</b> Stellen: Das Papier sieht aus wie der Bildschirm. Ein gedithertes Foto Punkt für Punkt zu plotten heißt rund 60 000-mal Stift absetzen, die Schraffur kommt mit rund 1 900-mal aus.</p>
+  <h3>Einstellen auf der Website</h3>
+  <ol>
+    <li><b>Ausgabe: Plotter</b> wählen. Die Papiervorschau zeigt den Plot mit 0,3-mm-Stift und die Zahl der Stiftabsenkungen.</li>
+    <li>Rechts in der Karte <b>Plotter · HSGMENU</b> einstellen:
+      <ul>
+        <li><b>Lage 1–4:</b> Helligkeit der Schraffur, kleiner = dunkler, 17 = Lage aus</li>
+        <li><b>Maßstab:</b> Bildgröße, 14 ergibt ca. 179 × 179 mm</li>
+        <li><b>Papier wie Bildschirm:</b> die Invertierung</li>
+        <li><b>Lücken:</b> nur Punkte-Modus</li>
+        <li><b>Stift-Nummer, Plotter-Adresse, Ränder</b></li>
+      </ul></li>
+    <li><b>HSGMENU mit diesen Werten ins D64</b> klicken, D64 herunterladen. Die Werte stehen dann fest im Programm.</li>
+  </ol>
+  <h3>Am CBM</h3>
+  <ul>
+    <li>Menü 1: nach dem Laden bei der Frage <b>S</b>, <b>K</b> oder <b>P</b> drücken. Nach dem Plot kommt die Frage wieder, z. B. für einen zweiten Stift.</li>
+    <li>Menü 2: Taste <b>S</b>, <b>K</b> oder <b>H</b>.</li>
+    <li>Es erscheint <code>PLOTTE AUF GERAET 5</code>, am Ende <code>PLOT FERTIG</code>. <b>STOP</b> bricht nur den Plot ab, der Stift wird abgelegt.</li>
+    <li>Antwortet am Bus niemand: <code>PLOTTER ANTWORTET NICHT</code>.</li>
+  </ul>
+  <div class="fig"><img src="../docs/bilder/vorschau-modi-vergleich.png" style="width:78%"><div class="cap">Vergleich am Testbild: Bildschirm, Kringel, Schraffur (Simulation), unten jeweils vergrößert.</div></div>
+  <table>
+    <tr><th>Foto-Testbild FOTO512</th><th>Stift senken</th><th>Zeichenweg</th><th>Rechenzeit 6502</th></tr>
+    <tr><td>Punkte</td><td>59 861 ×</td><td>27 m</td><td>419 s</td></tr>
+    <tr><td>Kringel</td><td>161 ×</td><td>71 m</td><td>189 s</td></tr>
+    <tr><td><b>Schraffur</b></td><td><b>1 902 ×</b></td><td><b>69 m</b></td><td><b>37 s</b></td></tr>
+  </table>
+  <p class="sub">Rechenzeit ohne Wartezeit auf den Plotter. Der Plotter selbst braucht für rund 70 m Zeichenweg deutlich länger.</p>
+</section>
+
+<!-- ================================================================ 8 -->
+<section class="chapter">
+  <h2>8 · Anwendungsfall 4: Drucken auf dem CBM 8028</h2>
+  <p>Der Typenraddrucker kann keine Grafik, nur Zeichen. Die Website wählt deshalb je Zeichenzelle das Zeichen oder Zeichenpaar, dessen Form am besten zum Bild passt.</p>
+  <div class="fig"><img src="../docs/bilder/vorschau-8028-textgrafik.png" style="width:100%"><div class="cap">Simulation: Bildschirm, 80 Zeichen einfach, 80 Zeichen überdruckt, 132 Zeichen überdruckt</div></div>
+  <h3>Drucker vorbereiten</h3>
+  <ul>
+    <li>An den <b>IEEE-Bus</b> (gleicher Anschluss wie die Floppy). Adresse ab Werk <b>4</b>, nur vom Händler auf 5–11 änderbar.</li>
+    <li>Schalter <b>PRINT ON</b>. <b>Bei PRINT OFF blockiert der 8028 den ganzen Bus</b>, sobald er angesprochen wird.</li>
+    <li>Selbsttest: <b>FORM FEED</b> gedrückt halten und einschalten.</li>
+  </ul>
+  <h3>Ablauf</h3>
+  <ol>
+    <li>Website: <b>Ausgabe: Drucker CBM 8028</b>. Breite wählen (80/96 Zeichen ≈ 20 cm, 132/158 Zeichen ≈ 33,5 cm) und Überdrucken (CS = Vorgabe, BS oder aus).</li>
+    <li><b>Textgrafik ins D64</b>, dazu <b>Druckprogramm DRUCK8028</b> und <b>Testseite 8028TEST</b>. Auf <code>hsgmenu.d64</code> sind beide schon drauf.</li>
+    <li>Am CBM zuerst die Testseite drucken:</li>
+  </ol>
+  <div class="cbm">load "druck8028",8
+run
+DATEI? 8028TEST
+DRUCKER-ADRESSE (4)?</div>
+  <p>Dann genauso die eigene Textgrafik. STOP bricht ab. Die Datei stellt den Zeichenabstand selbst ein.</p>
+  <h3>Codes des 8028 (Bedienungshandbuch 8.3 / 9.1, Typenrad RUSTIKA)</h3>
+  <table>
+    <tr><th>Code</th><th>Wirkung</th></tr>
+    <tr><td><code>$0D</code> CR</td><td>Zeile drucken mit Zeilenvorschub (ein LF direkt danach wird ignoriert)</td></tr>
+    <tr><td><code>$8D</code> CS</td><td>Zeile drucken ohne Zeilenvorschub – zum Überdrucken</td></tr>
+    <tr><td><code>$08</code> BS</td><td>nächstes Zeichen auf dieselbe Stelle</td></tr>
+    <tr><td><code>$04</code> / <code>$84</code></td><td>10 / 12 Zeichen pro Zoll</td></tr>
+    <tr><td><code>$41–$5A</code> / <code>$C1–$DA</code></td><td>a–z / A–Z (der 8028 liest PETSCII)</td></tr>
+    <tr><td><code>$40</code>, <code>$5B–$5E</code></td><td>§ bzw. Leerzeichen auf diesem Typenrad – werden nicht verwendet</td></tr>
+  </table>
+  <div class="box"><b>Gut zu wissen:</b> Erkennbare Gesichter gibt es erst mit 132 Zeichen Breite, und ein dunkles Bild braucht viel Farbband. Bei 30 Zeichen pro Sekunde dauert eine 132er-Grafik etwa 8–10 Minuten.</div>
+</section>
+
+<!-- ================================================================ 9 -->
+<section class="chapter">
+  <h2>9 · HSGMENU: alle Tasten</h2>
+  <table>
+    <tr><th>Wo</th><th>Taste / Eingabe</th><th>Wirkung</th></tr>
+    <tr><td rowspan="3"><b>Menü</b></td><td><b>1</b></td><td>Bild von Diskette (DIREKTPLOT)</td></tr>
+    <tr><td><b>2</b></td><td>HSG-Link (Bilder vom PC)</td></tr>
+    <tr><td><b>E</b>, <b>STOP</b></td><td>Programm beenden</td></tr>
+    <tr><td rowspan="2"><b>1 · Dateiname</b></td><td>Name + RETURN</td><td>Bild laden und anzeigen</td></tr>
+    <tr><td>nur RETURN</td><td>zurück ins Menü</td></tr>
+    <tr><td rowspan="3"><b>1 · Plot-Frage</b></td><td><b>S</b> / <b>K</b> / <b>P</b> (oder <b>J</b>)</td><td>Schraffur / Kringel / Punkte plotten, danach Frage erneut</td></tr>
+    <tr><td><b>N</b>, andere Taste</td><td>nächster Dateiname</td></tr>
+    <tr><td><b>STOP</b></td><td>nächster Dateiname</td></tr>
+    <tr><td rowspan="3"><b>2 · Empfang</b></td><td><b>S</b> / <b>K</b> / <b>H</b></td><td>Schraffur / Kringel / Punkte plotten</td></tr>
+    <tr><td><b>D</b>, <b>LEER</b></td><td>Grafik auf dem eingebauten Schirm an/aus</td></tr>
+    <tr><td><b>STOP</b></td><td>zurück ins Menü</td></tr>
+    <tr><td><b>Während Plot</b></td><td><b>STOP</b></td><td>nur den Plot abbrechen, Stift ablegen</td></tr>
+  </table>
+  <h3>Meldungen</h3>
+  <table>
+    <tr><th>Meldung</th><th>Bedeutung</th></tr>
+    <tr><td><code>FILE NOT FOUND ERROR</code></td><td>Datei nicht auf der Diskette, Name prüfen</td></tr>
+    <tr><td><code>BILD EMPFANGEN</code></td><td>HSG-Link: ein Vollbild ist angekommen</td></tr>
+    <tr><td><code>PRUEFSUMMENFEHLER</code></td><td>HSG-Link: Übertragung gestört, Kabel prüfen, erneut senden</td></tr>
+    <tr><td><code>PLOTTE AUF GERAET n</code> / <code>PLOT FERTIG</code></td><td>Plot läuft / ist fertig</td></tr>
+    <tr><td><code>PLOT ABGEBROCHEN</code></td><td>STOP während des Plots</td></tr>
+    <tr><td><code>PLOTTER ANTWORTET NICHT</code></td><td>auf der eingestellten Adresse meldet sich kein Gerät</td></tr>
+  </table>
+</section>
+
+<!-- ================================================================ 10 -->
+<section class="chapter">
+  <h2>10 · Fehlersuche</h2>
+  <table>
+    <tr><th>Problem</th><th>Ursache und Abhilfe</th></tr>
+    <tr><td>Bild am CBM gestaucht oder gestreckt</td><td>Auf der Website bei „Bildschirm“ <b>Laut Datenblatt</b> wählen, nicht „Quadratische Pixel“. Für den eigenen Monitor: „Eigene Messung“.</td></tr>
+    <tr><td>Bild flimmert stark</td><td>Normal beim EF9365 (25 Hz interlaced) ohne nachleuchtenden Monitor.</td></tr>
+    <tr><td>Bild halb oder doppelt</td><td>Bilddatei passt nicht zum Chip: „512“-Bilder für EF9365, „256“-Bilder für EF9366.</td></tr>
+    <tr><td>„Der CBM quittiert nicht“ (Website)</td><td>HSGMENU Taste 2 bzw. HSGSER läuft nicht, Kabel sitzt falsch herum oder CA1/CB2 vertauscht. Kontakt A liegt von hinten gesehen links.</td></tr>
+    <tr><td>Pro Micro wird nicht gefunden</td><td>Chrome oder Edge verwenden (Web Serial). Im Arduino-Monitor muss <code>HSGLINK 1.0</code> erscheinen.</td></tr>
+    <tr><td><code>?DEVICE NOT PRESENT</code></td><td>Am Bus antwortet niemand auf dieser Adresse. Gerät eingeschaltet? Richtige Adresse? Steckt das Kabel am IEEE-Anschluss (nicht am Userport)?</td></tr>
+    <tr><td>Floppy liest nicht mehr, sobald ein weiteres Gerät dranhängt</td><td>Ein <b>ausgeschaltetes</b> Gerät am Bus kann die Leitungen nach unten ziehen – alle Geräte einschalten. Zwei Geräte auf derselben Adresse stören sich. Beim 8028: <b>PRINT ON</b>. Bleibt der Fehler: Geräte einzeln anschließen und im Ruhezustand die Busleitungen messen (Anhang D).</td></tr>
+    <tr><td>Plot zu hell oder zu dunkel</td><td>Website, Ausgabe Plotter: Lage 1–4 kleiner = dunkler. Oder Tonwerte (Kontrast, Gamma) anpassen. Vorschau zeigt das Ergebnis.</td></tr>
+    <tr><td>Plot ist ein Negativ</td><td>„Papier wie Bildschirm“ einschalten (POKE 1050,1).</td></tr>
+    <tr><td>8028 druckt Leerzeichen statt Klammern</td><td>Normal beim Typenrad RUSTIKA, die Textgrafik verwendet diese Codes nicht.</td></tr>
+    <tr><td>8028 überdruckt nicht</td><td>Mit 8028TEST prüfen, ob CS oder BS klappt, und auf der Website die passende Art wählen.</td></tr>
+  </table>
+</section>
+
+<!-- ================================================================ 11 -->
+<section class="chapter">
+  <h2>11 · Anhang</h2>
+  <h3>A · Plotter-Einstellungen (Adressen 1043–1056, alle drei Plot-Programme)</h3>
+  <table>
+    <tr><th>Adresse</th><th>Bedeutung</th><th>Vorgabe</th></tr>
+    <tr><td>1043</td><td>IEEE-Adresse des Plotters</td><td>5</td></tr>
+    <tr><td>1044</td><td>Sekundäradresse</td><td>0</td></tr>
+    <tr><td>1045</td><td>Plotter-Einheiten je Bildpunkt (1 Einheit = 0,025 mm)</td><td>14 → ca. 179 × 179 mm</td></tr>
+    <tr><td>1046/1047</td><td>linker Rand Low/High</td><td>1800 (<code>poke 1046,8:poke 1047,7</code>)</td></tr>
+    <tr><td>1048/1049</td><td>unterer Rand Low/High</td><td>250 (<code>poke 1048,250:poke 1049,0</code>)</td></tr>
+    <tr><td>1050</td><td>1 = dunkle Stellen zeichnen, 0 = helle (Negativ)</td><td>1</td></tr>
+    <tr><td>1051</td><td>Stift-Nummer</td><td>1</td></tr>
+    <tr><td>1052</td><td>Punkte-Modus: Lücken bis n Punkte mitzeichnen</td><td>0</td></tr>
+    <tr><td>1053–1056</td><td>Schraffur: Schwellen für Lage 1–4 (Punkte je 4 × 4-Fläche, 17 = aus)</td><td>2, 5, 8, 11</td></tr>
+  </table>
+  <p>Beispiel dunklere Schraffur: <code>poke 1053,1:poke 1054,4:poke 1055,7:poke 1056,10</code> (nach <code>load</code>, vor <code>run</code>).</p>
+  <h3>B · Bildformat</h3>
+  <p>Rohdaten ohne Kopf, 64 Byte je Zeile, oberste Zeile zuerst, höchstes Bit = linker Punkt, Bit 1 = Punkt an. EF9365: 512 Zeilen = 32 768 Byte (130 Blöcke). EF9366: 256 Zeilen = 16 384 Byte (65 Blöcke).</p>
+  <h3>C · HSG-Link-Protokoll</h3>
+  <p>Rahmen <code>"H" "S" "G" &lt;Befehl&gt; &lt;Kopf&gt; &lt;Daten&gt; &lt;Prüfsumme&gt;</code>, Prüfsumme = Summe aus Kopf und Daten mod 256. Befehle: <b>I</b> Vollbild, <b>P</b> Ausschnitt, <b>C</b> Löschen, <b>Q</b> Ende. Handshake je Byte: Pro Micro legt das Byte an PA0–7 und erzeugt eine fallende Flanke an CA1, der CBM liest und schaltet CB2 um.</p>
+  <h3>D · IEEE-488-Stecker (24-polig)</h3>
+  <table>
+    <tr><th>Pin</th><th>Signal</th><th>Pin</th><th>Signal</th></tr>
+    <tr><td>1–4</td><td>DIO1–DIO4</td><td>13–16</td><td>DIO5–DIO8</td></tr>
+    <tr><td>5</td><td>EOI</td><td>17</td><td>REN (beim 8028 auf Masse)</td></tr>
+    <tr><td>6</td><td>DAV</td><td>18–24</td><td>Masse</td></tr>
+    <tr><td>7 / 8</td><td>NRFD / NDAC</td><td>9 / 11</td><td>IFC / ATN</td></tr>
+  </table>
+  <p class="sub">Im Ruhezustand liegen alle Signalleitungen hoch (ca. 2,5–3,5 V). Eine Leitung dauerhaft nahe 0 V zeigt ein Gerät, das den Bus festhält.</p>
+  <h3>E · Speicher</h3>
+  <p>HSGMENU belegt <code>$0401–$16E6</code>, die Puffer reichen bis <code>$1826</code>, die Schraffur-Karte liegt bei <code>$2000–$5FFF</code>.</p>
+  <h3>F · Quellen und Dank</h3>
+  <ul>
+    <li>HSG Image Loader (HSGIMAGE): AndyG, Juli 2024 – Grundlage für Laden und Anzeigen</li>
+    <li>HSG-ROM (<code>hcopy</code>, <code>tstb</code>): Verfahren zum Zurücklesen</li>
+    <li>Datenblatt EF9365/66, HSG-Handbuch, Schaltplan CBM 8032 (8032029)</li>
+    <li>Bedienungshandbuch und Service-Manual CBM 8028</li>
+    <li>VzEkC-Forum (classic-computing.de), Threads zu HSG, HP-GL und 8028</li>
+  </ul>
+</section>
+
+</body>
+</html>
