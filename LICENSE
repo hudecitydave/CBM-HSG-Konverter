@@ -19,12 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
--------------------------------------------------------------------------------
-Third-party content (not covered by the MIT license above)
-
-HSG Image Loader (HSGIMAGE), (c) AndyG, July 2024, shared freely by its author.
-It is included unchanged as a binary in hsg-converter.html, serial/hsgser.d64
-and cbm/hsgplot.d64, and its loading routines form the basis of
-cbm/direktplot.asm, cbm/hsgmenu.asm and serial/hsgser.asm.
-All rights to these parts remain with AndyG.

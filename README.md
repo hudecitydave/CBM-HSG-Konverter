@@ -397,7 +397,7 @@ Das Testbild BLUES und die Fotos stammen vom Autor.
 
 ## Lizenz
 
-[MIT](LICENSE) für den Code und die Dokumentation dieses Repositorys.
+[MIT](LICENSE) für den Code und die Dokumentation dieses Repositorys, mit den in [NOTICE.md](NOTICE.md) genannten Ausnahmen.
 
 **Ausgenommen** ist der **HSG Image Loader (HSGIMAGE)** von **AndyG** (Juli 2024). Er wurde von seinem Autor frei geteilt, alle Rechte bleiben bei ihm. Er steckt unverändert im HTML-Konverter sowie auf `serial/hsgser.d64` und `cbm/hsgplot.d64`, und seine Laderoutinen sind die Grundlage von DIREKTPLOT, HSGMENU und HSGSER.
 
