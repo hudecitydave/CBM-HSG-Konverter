@@ -129,7 +129,7 @@ Bauen und testen: siehe [../README.md](../README.md).
 - **Echte Hardware:**
   - DIREKTPLOT mit Schraffur und Invertierung lief am HSG-Board und HP-Plotter (16.11.2026).
   - Punkte und Kringel liefen schon vorher.
-  - HSGMENU nutzt denselben Code, ist am echten CBM aber noch nicht gelaufen.
+  - HSGMENU läuft am echten CBM (Rückmeldung vom 20.11.2026).
 - **Emulation** (alle Plot-Modi Byte für Byte gegen die Referenzen in `hpgl-sim.js`):
 
   | Test | Ergebnis |

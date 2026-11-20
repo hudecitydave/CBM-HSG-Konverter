@@ -374,7 +374,7 @@ node tools/test-website.js
 | HSG-Link mit HSGSER | ✓ |
 | Plot mit Punkten und Kringeln | ✓ (erste Tests) |
 | **Plot mit Schraffur, invertiert** | ✓ (DIREKTPLOT, 16.11.2026) |
-| HSGMENU (fasst alles zusammen) | noch nicht, gleicher Code wie DIREKTPLOT und HSGPLOT |
+| **HSGMENU** (fasst alles zusammen) | ✓ (20.11.2026) |
 | Drucker CBM 8028 | noch nicht, in Arbeit |
 
 ---
