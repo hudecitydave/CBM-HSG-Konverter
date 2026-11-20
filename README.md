@@ -2,7 +2,7 @@
 
 **Fotos für das HSG/LSG-Grafikboard im Commodore CBM 8032/4032: anzeigen, live vom PC senden, auf einem HP-Plotter zeichnen und auf dem Typenraddrucker CBM 8028 drucken.**
 
-*Photos for the Commodore HSG/LSG high-speed graphics board (EF9365/EF9366) in the CBM 8032/4032: a browser-based converter, disk images, a USB-to-userport link, HP-GL plotting and daisy-wheel ASCII art. Documentation is in German.*
+🇩🇪 Deutsche Version · 🇬🇧 [English version](README.en.md)
 
 <p align="center">
   <img src="docs/bilder/cbm-bildschirm-blues.jpg" width="90%" alt="Gedithertes Foto auf dem HSG-Bildschirm eines CBM 8032">
