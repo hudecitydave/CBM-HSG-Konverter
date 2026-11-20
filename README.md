@@ -58,7 +58,7 @@ Daraus wurde Schritt für Schritt dieses Projekt:
 
 ## Schnellstart
 
-> 📘 **Alles zum Ausdrucken:** die **[Komplett-Anleitung (PDF, 14 Seiten)](CBM-HSG-Komplett-Anleitung.pdf)** mit allen Anwendungsfällen, Tastenübersicht, Fehlersuche und Anhang. Für den Bau des HSG-Link-Kabels gibt es zusätzlich die **[HSG-Link-Anleitung](HSG-Link-Anleitung.pdf)**.
+> 📘 **Alles zum Ausdrucken:** die **[Komplett-Anleitung (PDF, 16 Seiten)](CBM-HSG-Komplett-Anleitung.pdf)** mit allen Anwendungsfällen, Tastenübersicht, Fehlersuche und Anhang. Für den Bau des HSG-Link-Kabels gibt es zusätzlich die **[HSG-Link-Anleitung](HSG-Link-Anleitung.pdf)**.
 
 1. **[`hsg-converter.html`](hsg-converter.html)** im Browser öffnen und ein Foto hineinziehen.
 2. Oben links bei **Grafikchip** den Chip deines Boards wählen und bei **Ausgabe** das Ziel.

@@ -59,7 +59,7 @@ pre { font-family: Consolas, monospace; background: #f1f3ee; border: 1px solid v
     <div>1 · Überblick</div>
     <div>2 · Was du brauchst</div>
     <div>3 · Erste Schritte am CBM</div>
-    <div>4 · Die Website</div>
+    <div>4 · Der HTML-Konverter</div>
     <div>5 · Anwendungsfall 1: Lokal am CBM</div>
     <div>6 · Anwendungsfall 2: Mit Serial (HSG-Link)</div>
     <div>7 · Anwendungsfall 3: Plotten</div>
@@ -75,10 +75,23 @@ pre { font-family: Consolas, monospace; background: #f1f3ee; border: 1px solid v
 <section class="chapter">
   <h2>1 · Überblick</h2>
   <p>Das HSG-Board („Hochauflösende Grafik“ von Commodore Deutschland, nachgebaut als LSG) zeigt 512 × 256 Punkte (EF9366) oder 512 × 512 Punkte (EF9365) in Schwarz-Weiß. Dieses Projekt bringt beliebige Fotos auf dieses Board und von dort aufs Papier.</p>
+  <h3>Wie es dazu kam</h3>
+  <p>Am Anfang stand die <b>Low-Speed-Graphik (LSG)</b> von <b>InsaneDruid</b>, ein zu 100 % kompatibler Nachbau der Commodore-HSG-Karte für CBM 8032, 4016 und 4032 (<code>github.com/InsaneDruid/Low-Speed-Graphik</code>, CC BY-SA 4.0). Sie entstand mit Hilfe der Runde im VzEkC-Forum. Mit der Karte kamen zwei kleine Programme:</p>
+  <ul>
+    <li><b><code>bmp2hsg.py</code></b> von InsaneDruid (Python, 2024, CC0), das <b>Ur-Programm des Konverters</b>. Es wandelt eine fertige Schwarz-Weiß-BMP mit 512 × 256 oder 512 × 512 Punkten in eine ladbare HSG-Datei.</li>
+    <li>Der <b>HSG Image Loader</b> (HSGIMAGE) von <b>AndyG</b> (Juli 2024). Er zeigt eine solche Datei am CBM an.</li>
+  </ul>
+  <p>Daraus wurde Schritt für Schritt dieses Projekt:</p>
+  <ol>
+    <li>Ein HTML-Konverter, der jedes Foto direkt im Browser aufbereitet.</li>
+    <li>HSG-Link für die Übertragung live über den Userport.</li>
+    <li>HSGMENU mit Plotter-Ausgabe.</li>
+    <li>Zuletzt die Textgrafik für den Typenraddrucker CBM 8028.</li>
+  </ol>
   <h3>Die Bausteine</h3>
   <table>
     <tr><th>Teil</th><th>Was es tut</th><th>Wo</th></tr>
-    <tr><td><b>Website</b> <code>hsg-converter.html</code></td><td>Bild aufbereiten (Ausschnitt, Tonwerte, Dithering), Vorschau, D64-Disketten zusammenstellen, Bilder per HSG-Link senden, Plot- und Druckvorschau</td><td>PC, Browser</td></tr>
+    <tr><td><b>HTML-Konverter</b> <code>hsg-converter.html</code></td><td>Bild aufbereiten (Ausschnitt, Tonwerte, Dithering), Vorschau, D64-Disketten zusammenstellen, Bilder per HSG-Link senden, Plot- und Druckvorschau</td><td>PC, Browser</td></tr>
     <tr><td><b>HSGMENU</b></td><td>Hauptprogramm am CBM: Menü mit „1 = Bild von Diskette“ und „2 = HSG-Link“, in beiden Fällen mit Plotten</td><td>CBM</td></tr>
     <tr><td>HSGIMAGE</td><td>Original-Loader von AndyG: Bild von Diskette anzeigen</td><td>CBM</td></tr>
     <tr><td>HSGSER</td><td>Reiner HSG-Link-Empfänger ohne Plotter</td><td>CBM</td></tr>
@@ -89,10 +102,10 @@ pre { font-family: Consolas, monospace; background: #f1f3ee; border: 1px solid v
   <h3>Welcher Weg für welchen Zweck?</h3>
   <table>
     <tr><th>Du willst …</th><th>Weg</th><th>Kapitel</th></tr>
-    <tr><td>Bilder vorbereiten und ohne PC-Verbindung am CBM zeigen</td><td>Website → D64 → Floppy → HSGMENU, Taste 1</td><td>5</td></tr>
-    <tr><td>Bilder direkt vom PC zeigen, Ausschnitt und Helligkeit live probieren</td><td>Website → HSG-Link → HSGMENU, Taste 2</td><td>6</td></tr>
+    <tr><td>Bilder vorbereiten und ohne PC-Verbindung am CBM zeigen</td><td>HTML-Konverter → D64 → Floppy → HSGMENU, Taste 1</td><td>5</td></tr>
+    <tr><td>Bilder direkt vom PC zeigen, Ausschnitt und Helligkeit live probieren</td><td>HTML-Konverter → HSG-Link → HSGMENU, Taste 2</td><td>6</td></tr>
     <tr><td>Das Bild auf Papier zeichnen</td><td>wie 1 oder 2, dann Taste S, K oder P/H</td><td>7</td></tr>
-    <tr><td>Das Bild als Textgrafik drucken</td><td>Website (Ausgabe „Drucker 8028“) → D64 → DRUCK8028</td><td>8</td></tr>
+    <tr><td>Das Bild als Textgrafik drucken</td><td>HTML-Konverter (Ausgabe „Drucker 8028“) → D64 → DRUCK8028</td><td>8</td></tr>
   </table>
   <div class="fig"><img src="../docs/bilder/vorschau-blues-schraffur.png" style="width:100%"><div class="cap">Links das Bild am HSG-Schirm, in der Mitte als Kringel-Plot, rechts als Schraffur-Plot (Simulation).</div></div>
 </section>
@@ -105,7 +118,7 @@ pre { font-family: Consolas, monospace; background: #f1f3ee; border: 1px solid v
     <li><b>CBM 8032 oder 4032</b> mit BASIC 4 und <b>32 KByte RAM</b>. Der Schraffur-Modus nutzt den Speicher bis <code>$5FFF</code>.</li>
     <li><b>HSG- oder LSG-Board</b> mit EF9365 (Version A, 512 × 512, flimmert ohne nachleuchtenden Monitor) oder EF9366 (Version B, 512 × 256, flimmerfrei).</li>
     <li>Ein <b>Laufwerk am IEEE-488-Bus</b>, z. B. ein SD-Laufwerk wie petSD+ bzw. CBM-D9096 (D64-Dateien direkt von der SD-Karte) oder eine echte Floppy wie 8050/8250 (D64 vorher auf Diskette übertragen).</li>
-    <li>Ein <b>PC</b> mit Chrome oder Edge. Die Website läuft auch offline, sie ist eine einzelne Datei.</li>
+    <li>Ein <b>PC</b> mit Chrome oder Edge. Der HTML-Konverter ist eine einzelne Datei und läuft ohne Internet.</li>
   </ul>
   <h3>Je nach Anwendungsfall</h3>
   <table>
@@ -148,13 +161,14 @@ E = ENDE
 
 WAHL ?</div>
   <p>Das Programm erkennt selbst, ob ein EF9365 oder EF9366 eingebaut ist. <b>E</b> oder <b>STOP</b> im Menü beendet es.</p>
-  <div class="box"><b>Plotter-Einstellungen</b> (Adresse, Größe, Helligkeit) stehen fest im Programm. Die Website schreibt sie dir passend ins HSGMENU auf dem D64 (Kapitel 7). Wer lieber am CBM einstellt, kann sie nach dem <code>load</code> und vor dem <code>run</code> per POKE ändern (Anhang A).</div>
+  <div class="box"><b>Plotter-Einstellungen</b> (Adresse, Größe, Helligkeit) stehen fest im Programm. Der HTML-Konverter schreibt sie dir passend ins HSGMENU auf dem D64 (Kapitel 7). Wer lieber am CBM einstellt, kann sie nach dem <code>load</code> und vor dem <code>run</code> per POKE ändern (Anhang A).</div>
 </section>
 
 <!-- ================================================================ 4 -->
 <section class="chapter">
-  <h2>4 · Die Website</h2>
-  <p><code>hsg-converter.html</code> im Browser öffnen. Ein Server oder eine Installation ist nicht nötig. Bild hineinziehen, einfügen (Strg+V) oder anklicken.</p>
+  <h2>4 · Der HTML-Konverter</h2>
+  <p><code>hsg-converter.html</code> ist eine <b>einzelne HTML-Datei</b>: doppelklicken, und sie öffnet sich im Browser. Es gibt keinen Server, keine Installation und keine Internetverbindung. Alles rechnet der Browser auf dem eigenen PC, kein Bild verlässt den Rechner. Bild hineinziehen, einfügen (Strg+V) oder anklicken.</p>
+  <div class="fig"><img src="../docs/bilder/html-konverter.jpg" style="width:68%"><div class="cap">Links die Einstellungen, in der Mitte die Vorschau (oben das Ergebnis wie am CBM, darunter die Quelle), rechts HSG-Link, D64 und Disk-Image.</div></div>
   <table>
     <tr><th>Bereich</th><th>Einstellungen</th></tr>
     <tr><td><b>Ausgabe</b></td><td>HSG-Bildschirm (Standard) · Plotter · Drucker CBM 8028. Schaltet die passenden Vorschauen und Karten ein.</td></tr>
@@ -177,7 +191,7 @@ WAHL ?</div>
   <p>Ohne Kabel zum PC. Die Bilder werden am PC vorbereitet und kommen per Diskette bzw. SD-Karte zum CBM.</p>
   <h3>Am PC</h3>
   <ol>
-    <li>Website öffnen, <b>Ausgabe: HSG-Bildschirm</b>, den richtigen <b>Grafikchip</b> wählen.</li>
+    <li><code>hsg-converter.html</code> öffnen, <b>Ausgabe: HSG-Bildschirm</b>, den richtigen <b>Grafikchip</b> wählen.</li>
     <li>Bild hineinziehen und einstellen, bis die Vorschau gefällt.</li>
     <li>Rechts unter <b>In D64 schreiben</b> einen Dateinamen eingeben (max. 16 Zeichen) und <b>Zum D64 hinzufügen</b> klicken. Für weitere Bilder wiederholen.</li>
     <li>Bei <b>Disk-Image</b>: Ein neues D64 enthält auf Wunsch schon HSGMENU, HSGIMAGE und HSGSER. <b>D64 herunterladen</b>.</li>
@@ -197,7 +211,7 @@ WAHL ?</div>
 <!-- ================================================================ 6 -->
 <section class="chapter">
   <h2>6 · Anwendungsfall 2: Mit Serial (HSG-Link)</h2>
-  <p>Die Website schickt das Bild per USB an den Pro Micro, der es Byte für Byte über den Userport an den CBM gibt. Mit <b>Live</b> erscheint jede Änderung nach einem Augenblick auf dem CBM, übertragen wird nur das geänderte Rechteck.</p>
+  <p>Der HTML-Konverter schickt das Bild per USB an den Pro Micro, der es Byte für Byte über den Userport an den CBM gibt. Mit <b>Live</b> erscheint jede Änderung nach einem Augenblick auf dem CBM, übertragen wird nur das geänderte Rechteck.</p>
   <div class="two">
     <div class="fig"><img src="../docs/bilder/hsg-link-pro-micro.jpg"><div class="cap">Pro Micro mit 470-Ω-Widerständen am Userport</div></div>
     <div class="fig"><img src="../docs/bilder/hsgser-empfang.jpg"><div class="cap">Der Empfänger meldet jedes Bild</div></div>
@@ -219,14 +233,14 @@ WAHL ?</div>
   <h3>Benutzung</h3>
   <ol>
     <li>Am CBM: <code>load "hsgmenu",8</code>, <code>run</code>, Taste <b>2</b>. Es erscheint „Warte auf Daten“.</li>
-    <li>Website in Chrome/Edge: rechts <b>HSG-Link → Verbinden …</b>, den Pro Micro wählen. „HSGLINK 1.0 bereit“ erscheint.</li>
+    <li>HTML-Konverter in Chrome/Edge: rechts <b>HSG-Link → Verbinden …</b>, den Pro Micro wählen. „HSGLINK 1.0 bereit“ erscheint.</li>
     <li><b>Bild senden</b>, oder <b>Live</b> einschalten und am Bild drehen.</li>
   </ol>
   <table>
     <tr><th>Taste am CBM</th><th>Wirkung</th></tr>
     <tr><td><b>D</b> oder <b>LEER</b></td><td>Grafik zusätzlich auf den eingebauten Schirm und zurück (HSG-Umschalter in Mittelstellung)</td></tr>
     <tr><td><b>S</b>, <b>K</b>, <b>H</b></td><td>das angezeigte Bild plotten (Kapitel 7). Während einer Übertragung gedrückt: Plot startet, sobald das Bild fertig ist</td></tr>
-    <tr><td><b>STOP</b></td><td>zurück ins Menü. „Viewer beenden“ auf der Website tut dasselbe</td></tr>
+    <tr><td><b>STOP</b></td><td>zurück ins Menü. „Viewer beenden“ im HTML-Konverter tut dasselbe</td></tr>
   </table>
 </section>
 
@@ -247,7 +261,7 @@ WAHL ?</div>
     <tr><td><b>P</b> / <b>H</b></td><td>Punkte</td><td>jede Punktfolge einer Zeile als Strich</td><td>Strichzeichnungen</td></tr>
   </table>
   <p>Ab Werk zeichnet der Plotter die <b>dunklen</b> Stellen: Das Papier sieht aus wie der Bildschirm. Ein gedithertes Foto Punkt für Punkt zu plotten heißt rund 60 000-mal Stift absetzen, die Schraffur kommt mit rund 1 900-mal aus.</p>
-  <h3>Einstellen auf der Website</h3>
+  <h3>Einstellen im HTML-Konverter</h3>
   <ol>
     <li><b>Ausgabe: Plotter</b> wählen. Die Papiervorschau zeigt den Plot mit 0,3-mm-Stift und die Zahl der Stiftabsenkungen.</li>
     <li>Rechts in der Karte <b>Plotter · HSGMENU</b> einstellen:
@@ -280,7 +294,7 @@ WAHL ?</div>
 <!-- ================================================================ 8 -->
 <section class="chapter">
   <h2>8 · Anwendungsfall 4: Drucken auf dem CBM 8028</h2>
-  <p>Der Typenraddrucker kann keine Grafik, nur Zeichen. Die Website wählt deshalb je Zeichenzelle das Zeichen oder Zeichenpaar, dessen Form am besten zum Bild passt.</p>
+  <p>Der Typenraddrucker kann keine Grafik, nur Zeichen. Der HTML-Konverter wählt deshalb je Zeichenzelle das Zeichen oder Zeichenpaar, dessen Form am besten zum Bild passt.</p>
   <div class="fig"><img src="../docs/bilder/vorschau-8028-textgrafik.png" style="width:100%"><div class="cap">Simulation: Bildschirm, 80 Zeichen einfach, 80 Zeichen überdruckt, 132 Zeichen überdruckt</div></div>
   <h3>Drucker vorbereiten</h3>
   <ul>
@@ -290,7 +304,7 @@ WAHL ?</div>
   </ul>
   <h3>Ablauf</h3>
   <ol>
-    <li>Website: <b>Ausgabe: Drucker CBM 8028</b>. Breite wählen (80/96 Zeichen ≈ 20 cm, 132/158 Zeichen ≈ 33,5 cm) und Überdrucken (CS = Vorgabe, BS oder aus).</li>
+    <li>HTML-Konverter: <b>Ausgabe: Drucker CBM 8028</b>. Breite wählen (80/96 Zeichen ≈ 20 cm, 132/158 Zeichen ≈ 33,5 cm) und Überdrucken (CS = Vorgabe, BS oder aus).</li>
     <li><b>Textgrafik ins D64</b>, dazu <b>Druckprogramm DRUCK8028</b> und <b>Testseite 8028TEST</b>. Auf <code>hsgmenu.d64</code> sind beide schon drauf.</li>
     <li>Am CBM zuerst die Testseite drucken:</li>
   </ol>
@@ -347,17 +361,17 @@ DRUCKER-ADRESSE (4)?</div>
   <h2>10 · Fehlersuche</h2>
   <table>
     <tr><th>Problem</th><th>Ursache und Abhilfe</th></tr>
-    <tr><td>Bild am CBM gestaucht oder gestreckt</td><td>Auf der Website bei „Bildschirm“ <b>Laut Datenblatt</b> wählen, nicht „Quadratische Pixel“. Für den eigenen Monitor: „Eigene Messung“.</td></tr>
+    <tr><td>Bild am CBM gestaucht oder gestreckt</td><td>Im HTML-Konverter bei „Bildschirm“ <b>Laut Datenblatt</b> wählen, nicht „Quadratische Pixel“. Für den eigenen Monitor: „Eigene Messung“.</td></tr>
     <tr><td>Bild flimmert stark</td><td>Normal beim EF9365 (25 Hz interlaced) ohne nachleuchtenden Monitor.</td></tr>
     <tr><td>Bild halb oder doppelt</td><td>Bilddatei passt nicht zum Chip: „512“-Bilder für EF9365, „256“-Bilder für EF9366.</td></tr>
-    <tr><td>„Der CBM quittiert nicht“ (Website)</td><td>HSGMENU Taste 2 bzw. HSGSER läuft nicht, Kabel sitzt falsch herum oder CA1/CB2 vertauscht. Kontakt A liegt von hinten gesehen links.</td></tr>
+    <tr><td>„Der CBM quittiert nicht“ (HTML-Konverter)</td><td>HSGMENU Taste 2 bzw. HSGSER läuft nicht, Kabel sitzt falsch herum oder CA1/CB2 vertauscht. Kontakt A liegt von hinten gesehen links.</td></tr>
     <tr><td>Pro Micro wird nicht gefunden</td><td>Chrome oder Edge verwenden (Web Serial). Im Arduino-Monitor muss <code>HSGLINK 1.0</code> erscheinen.</td></tr>
     <tr><td><code>?DEVICE NOT PRESENT</code></td><td>Am Bus antwortet niemand auf dieser Adresse. Gerät eingeschaltet? Richtige Adresse? Steckt das Kabel am IEEE-Anschluss (nicht am Userport)?</td></tr>
     <tr><td>Floppy liest nicht mehr, sobald ein weiteres Gerät dranhängt</td><td>Ein <b>ausgeschaltetes</b> Gerät am Bus kann die Leitungen nach unten ziehen – alle Geräte einschalten. Zwei Geräte auf derselben Adresse stören sich. Beim 8028: <b>PRINT ON</b>. Bleibt der Fehler: Geräte einzeln anschließen und im Ruhezustand die Busleitungen messen (Anhang D).</td></tr>
-    <tr><td>Plot zu hell oder zu dunkel</td><td>Website, Ausgabe Plotter: Lage 1–4 kleiner = dunkler. Oder Tonwerte (Kontrast, Gamma) anpassen. Vorschau zeigt das Ergebnis.</td></tr>
+    <tr><td>Plot zu hell oder zu dunkel</td><td>HTML-Konverter, Ausgabe Plotter: Lage 1–4 kleiner = dunkler. Oder Tonwerte (Kontrast, Gamma) anpassen. Vorschau zeigt das Ergebnis.</td></tr>
     <tr><td>Plot ist ein Negativ</td><td>„Papier wie Bildschirm“ einschalten (POKE 1050,1).</td></tr>
     <tr><td>8028 druckt Leerzeichen statt Klammern</td><td>Normal beim Typenrad RUSTIKA, die Textgrafik verwendet diese Codes nicht.</td></tr>
-    <tr><td>8028 überdruckt nicht</td><td>Mit 8028TEST prüfen, ob CS oder BS klappt, und auf der Website die passende Art wählen.</td></tr>
+    <tr><td>8028 überdruckt nicht</td><td>Mit 8028TEST prüfen, ob CS oder BS klappt, und im HTML-Konverter die passende Art wählen.</td></tr>
   </table>
 </section>
 
@@ -395,6 +409,8 @@ DRUCKER-ADRESSE (4)?</div>
   <p>HSGMENU belegt <code>$0401–$16E6</code>, die Puffer reichen bis <code>$1826</code>, die Schraffur-Karte liegt bei <code>$2000–$5FFF</code>.</p>
   <h3>F · Quellen und Dank</h3>
   <ul>
+    <li>Low-Speed-Graphik (LSG), Nachbau der HSG-Karte: InsaneDruid, <code>github.com/InsaneDruid/Low-Speed-Graphik</code></li>
+    <li><code>bmp2hsg.py</code>, Ur-Programm des Konverters: InsaneDruid, 2024, CC0</li>
     <li>HSG Image Loader (HSGIMAGE): AndyG, Juli 2024 – Grundlage für Laden und Anzeigen</li>
     <li>HSG-ROM (<code>hcopy</code>, <code>tstb</code>): Verfahren zum Zurücklesen</li>
     <li>Datenblatt EF9365/66, HSG-Handbuch, Schaltplan CBM 8032 (8032029)</li>
