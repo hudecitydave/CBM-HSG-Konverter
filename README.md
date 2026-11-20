@@ -8,7 +8,20 @@
   <img src="docs/bilder/cbm-bildschirm-blues.jpg" width="90%" alt="Gedithertes Foto auf dem HSG-Bildschirm eines CBM 8032">
 </p>
 
-Alles läuft auf dem Original-CBM, ohne Umbauten am Rechner: Eine Website bereitet das Bild auf, ein kleines 6502-Programm zeigt, empfängt und plottet. Für die Live-Übertragung braucht es nur einen Arduino Pro Micro und ein selbst gelötetes Userport-Kabel.
+Alles läuft auf dem Original-CBM, ohne Umbauten am Rechner: Ein HTML-Konverter im Browser bereitet das Bild auf, ein kleines 6502-Programm zeigt, empfängt und plottet. Für die Live-Übertragung braucht es nur einen Arduino Pro Micro und ein selbst gelötetes Userport-Kabel.
+
+### Wie es dazu kam
+
+Am Anfang stand die **[Low-Speed-Graphik (LSG)](https://github.com/InsaneDruid/Low-Speed-Graphik)** von **InsaneDruid**: ein zu 100 % kompatibler Nachbau der Commodore-HSG-Karte für CBM 8032, 4016 und 4032. Sie ist entstanden mit Hilfe der Runde im [VzEkC-Forum](https://forum.classic-computing.de/) und steht unter CC BY-SA 4.0. Mit der Karte kamen zwei kleine Programme, mit denen das erste Bild auf den Schirm kam:
+
+- **`bmp2hsg.py`**, das Ur-Programm des Konverters, ebenfalls von **[InsaneDruid](https://github.com/InsaneDruid)** (Python, 2024, CC0). Es wandelt eine fertige Schwarz-Weiß-BMP mit 512 × 256 oder 512 × 512 Punkten in eine ladbare HSG-Datei. Ein eigenes Repository dafür gibt es nicht. Das Schwesterprojekt für die Data-Becker-Karte ist [BMP-2-DataPecker](https://github.com/InsaneDruid/BMP-2-DataPecker).
+- Der **HSG Image Loader** (HSGIMAGE) von **AndyG** (Juli 2024). Er lädt eine solche Datei am CBM von Diskette und zeigt sie an.
+
+Daraus wurde Schritt für Schritt dieses Projekt:
+1. Aus dem Python-Skript wurde ein HTML-Konverter, der jedes Foto direkt im Browser aufbereitet, mit Ausschnitt, Tonwerten, Dithering und Vorschau, und gleich ein D64 baut.
+2. HSG-Link schickt die Bilder live per USB über den Userport.
+3. HSGMENU plottet das Bild auf einem HP-Plotter, zuerst Punkt für Punkt, inzwischen als Schraffur.
+4. Zuletzt kam die Textgrafik für den Typenraddrucker CBM 8028 dazu.
 
 ---
 
@@ -20,7 +33,7 @@ Alles läuft auf dem Original-CBM, ohne Umbauten am Rechner: Eine Website bereit
 - [Anwendungsfall 2: Mit Serial – Bilder live vom PC (HSG-Link)](#anwendungsfall-2-mit-serial--bilder-live-vom-pc-hsg-link)
 - [Anwendungsfall 3: Plotten auf einem HP-Plotter](#anwendungsfall-3-plotten-auf-einem-hp-plotter)
 - [Anwendungsfall 4: Drucken auf dem CBM 8028](#anwendungsfall-4-drucken-auf-dem-cbm-8028)
-- [Die Website im Überblick](#die-website-im-überblick)
+- [Der HTML-Konverter im Überblick](#der-html-konverter-im-überblick)
 - [Anschlüsse am CBM](#anschlüsse-am-cbm)
 - [Aufbau des Repositorys](#aufbau-des-repositorys)
 - [Bauen und testen](#bauen-und-testen)
@@ -38,7 +51,7 @@ Alles läuft auf dem Original-CBM, ohne Umbauten am Rechner: Eine Website bereit
 | Commodore CBM 8032 oder 4032 mit **BASIC 4** und **32 KByte RAM** | ✓ | |
 | **HSG- oder LSG-Board** mit EF9365 (512 × 512) oder EF9366 (512 × 256) | ✓ | Grafik |
 | Floppy am IEEE-488-Bus, z. B. ein SD-Laufwerk wie petSD+/[CBM-D9096](https://github.com/InsaneDruid/CBM-D9096) oder ein echtes 8050/8250 | ✓ | Programme und Bilder laden |
-| PC mit Chrome oder Edge | ✓ | Website |
+| PC mit Chrome oder Edge | ✓ | HTML-Konverter |
 | Arduino **Pro Micro 5 V / 16 MHz**, 10 × 470 Ω, Userport-Stecker 2 × 12 | | Anwendungsfall 2 |
 | **HP-Plotter** mit HP-GL am IEEE-Bus (z. B. HP 7470A, 7475A) | | Anwendungsfall 3 |
 | **Typenraddrucker CBM 8028** | | Anwendungsfall 4 |
@@ -97,7 +110,7 @@ Bildformat: Rohdaten ohne Kopf, 64 Byte je Zeile, oberste Zeile zuerst, höchste
 
 ## Anwendungsfall 2: Mit Serial – Bilder live vom PC (HSG-Link)
 
-Die Website schickt das Bild über USB an einen Pro Micro, der es parallel an den Userport des CBM gibt. Mit **Live** erscheint jede Änderung an Ausschnitt oder Tonwerten nach einem Augenblick auf dem CBM, übertragen wird nur das geänderte Rechteck.
+Der HTML-Konverter schickt das Bild über USB an einen Pro Micro, der es parallel an den Userport des CBM gibt. Mit **Live** erscheint jede Änderung an Ausschnitt oder Tonwerten nach einem Augenblick auf dem CBM, übertragen wird nur das geänderte Rechteck.
 
 ```
 Browser (hsg-converter.html, Web Serial)
@@ -127,7 +140,7 @@ Userport CBM 8032 (VIA 6522)  →  HSGMENU (Taste 2) oder HSGSER  →  HSG-Board
 
 **Benutzung**
 1. Am CBM `load "hsgmenu",8`, `run`, Taste **2**. Alternativ den reinen Empfänger `load "hsgser",8`, `run`.
-2. Auf der Website rechts **HSG-Link → Verbinden …** und den Pro Micro wählen. Dann **Bild senden**, oder **Live** einschalten.
+2. Im HTML-Konverter rechts **HSG-Link → Verbinden …** und den Pro Micro wählen. Dann **Bild senden**, oder **Live** einschalten.
 3. Am CBM:
    - **D**/**LEER** schaltet die Grafik zusätzlich auf den eingebauten Bildschirm.
    - **S**, **K** oder **H** plotten das gerade angezeigte Bild (siehe Anwendungsfall 3).
@@ -152,7 +165,7 @@ Das angezeigte Bild wird vom HSG-Board zurückgelesen und als HP-GL über den IE
 Der Plotter zeichnet ab Werk die **dunklen** Stellen, das Papier sieht also aus wie der Bildschirm.
 
 **So geht's**
-1. Auf der Website die Ausgabe **Plotter** wählen. Rechts lassen sich einstellen:
+1. Im HTML-Konverter die Ausgabe **Plotter** wählen. Rechts lassen sich einstellen:
    - die Helligkeit der Schraffur (vier Lagen),
    - Größe, Stift, Plotter-Adresse, Ränder und Invertierung.
 
@@ -174,7 +187,7 @@ Der Plotter zeichnet ab Werk die **dunklen** Stellen, das Papier sieht also aus 
 
 Die Rechenzeit gilt ohne die Wartezeit auf den Plotter.
 
-**Einstellungen** (Adressen 1043–1056; die Website schreibt sie ins Programm, sonst per POKE nach dem `load`):
+**Einstellungen** (Adressen 1043–1056; der HTML-Konverter schreibt sie ins Programm, sonst per POKE nach dem `load`):
 
 | Adresse | Bedeutung | Vorgabe |
 |---|---|---|
@@ -196,12 +209,12 @@ Mehr zu den Modi, zum Zurücklesen und zum Speicher: [`cbm/README.md`](cbm/READM
 
 ## Anwendungsfall 4: Drucken auf dem CBM 8028
 
-Der Typenraddrucker kann keine Grafik, nur Zeichen. Die Website wählt daher je Zeichenzelle das Zeichen oder Zeichenpaar, dessen Form am besten zum Bild passt: eine Textgrafik in bester ASCII-Art-Tradition, nur mit echtem Typenrad.
+Der Typenraddrucker kann keine Grafik, nur Zeichen. Der HTML-Konverter wählt daher je Zeichenzelle das Zeichen oder Zeichenpaar, dessen Form am besten zum Bild passt: eine Textgrafik in bester ASCII-Art-Tradition, nur mit echtem Typenrad.
 
 <p align="center"><img src="docs/bilder/vorschau-8028-textgrafik.png" width="95%" alt="Simulation der Textgrafik mit 80 und 132 Zeichen"></p>
 
 **So geht's**
-1. Auf der Website die Ausgabe **Drucker CBM 8028** wählen, dann Breite (80, 96, 132 oder 158 Zeichen) und Art des Überdruckens.
+1. Im HTML-Konverter die Ausgabe **Drucker CBM 8028** wählen, dann Breite (80, 96, 132 oder 158 Zeichen) und Art des Überdruckens.
 2. **Textgrafik ins D64**, dazu **Druckprogramm DRUCK8028** und **Testseite 8028TEST**. Auf `cbm/hsgmenu.d64` sind beide schon drauf.
 3. Drucker an den **IEEE-Bus**, Adresse 4 (ab Werk), Schalter **PRINT ON**.
 4. Am CBM: `load "druck8028",8`, `run`, Dateiname eingeben, RETURN für Adresse 4. Vorher einmal **8028TEST** drucken.
@@ -223,9 +236,19 @@ Hinweise:
 
 ---
 
-## Die Website im Überblick
+## Der HTML-Konverter im Überblick
 
-[`hsg-converter.html`](hsg-converter.html) ist eine einzelne HTML-Datei ohne Server und ohne Installation. Nur für HSG-Link braucht es Chrome oder Edge (Web Serial).
+[`hsg-converter.html`](hsg-converter.html) ist eine **einzelne HTML-Datei**: herunterladen, doppelklicken, fertig. Es gibt keinen Server, keine Installation und keine Internetverbindung. Alles rechnet der Browser auf dem eigenen PC, kein Bild verlässt den Rechner. Nur für HSG-Link braucht es Chrome oder Edge (Web Serial).
+
+<p align="center"><img src="docs/bilder/html-konverter.jpg" width="95%" alt="Oberfläche des HTML-Konverters mit geladenem Foto"></p>
+
+Die Seite hat drei Spalten:
+
+| Links: Einstellungen | Mitte: Vorschau | Rechts: Ausgabe |
+|---|---|---|
+| Ausgabe-Ziel, Grafikchip, Bildanpassung, Tonwerte, Dithering, Ausgabeformat | Bild hineinziehen. **Ergebnis** genau so, wie es am CBM erscheint, darunter die **Quelle** vor dem Dithering. Je nach Ziel zusätzlich die **Plot-** oder **Druckvorschau** auf Papier | HSG-Link (senden, live), Plotter- bzw. 8028-Einstellungen, D64 schreiben, Disk-Image mit Verzeichnis im CBM-Stil |
+
+Die einzelnen Bereiche:
 
 | Bereich | Funktionen |
 |---|---|
@@ -264,7 +287,7 @@ Details zur Belegung: [`serial/README.md`](serial/README.md#verdrahtung).
 ## Aufbau des Repositorys
 
 ```
-hsg-converter.html        Website: Konverter, HSG-Link, Plot- und 8028-Vorschau, D64-Verwaltung
+hsg-converter.html        HTML-Konverter: Bildaufbereitung, HSG-Link, Plot- und 8028-Vorschau, D64-Verwaltung
 CBM-HSG-Komplett-Anleitung.pdf  Komplett-Anleitung: alle Anwendungsfälle, Tasten, Fehlersuche, Anhang
 HSG-Link-Anleitung.pdf    Anleitung HSG-Link (Kabel, Installation, Inbetriebnahme)
 anleitung/                Quellen beider Anleitungen (HTML); PDF bauen: node tools/build-komplett.js
@@ -272,7 +295,7 @@ cbm/                      CBM-Programme, Disketten, Testbilder, Emulationstests 
   hsgmenu.asm/.prg/.d64     Hauptprogramm mit Menü (Diskette, HSG-Link, Plotter)
   hsgplot.*                 Einzelprogramm: HSG-Link + Plotter
   direktplot.*              Einzelprogramm: Diskette + Plotter
-  hpgl-sim.js               Plotter-Simulation und Referenzen (auch in der Website)
+  hpgl-sim.js               Plotter-Simulation und Referenzen (auch im HTML-Konverter)
 serial/                   HSG-Link: Empfänger HSGSER, Pro-Micro-Sketch, Lötplan  → serial/README.md
 tools/                    6502-Assembler und -Emulator, Disk-Werkzeug, Tests, update-html.js
 docs/bilder/              Bilder für diese Seite
@@ -292,7 +315,7 @@ node cbm/make-d64.js
 
 Die drei Befehle:
 1. **`asm6502.js`** assembliert HSGMENU. Für HSGPLOT, DIREKTPLOT und `serial/hsgser.asm` gilt dasselbe mit dem jeweiligen Namen.
-2. **`update-html.js`** bettet das neue HSGMENU und `cbm/hpgl-sim.js` in die Website ein.
+2. **`update-html.js`** bettet das neue HSGMENU und `cbm/hpgl-sim.js` in den HTML-Konverter ein.
 3. **`make-d64.js`** baut `hsgmenu.d64`, `hsgplot.d64` und `direktplot.d64`.
 
 Die Tests laufen in einem emulierten CBM. Dazu gehören 6502, VIA, EF936x mit Rücklesen, Diskette und ein HP-GL-Plotter am IEEE-Bus. Alle Plot-Modi werden Byte für Byte gegen die Referenzen in `cbm/hpgl-sim.js` geprüft:
@@ -313,7 +336,7 @@ node tools/test-website.js
 | HSGPLOT | 44/44 |
 | DIREKTPLOT | 49/49 |
 | HSGSER | 20/20 |
-| Website | 17/17 |
+| HTML-Konverter | 17/17 |
 
 ---
 
@@ -347,7 +370,7 @@ node tools/test-website.js
 
 | Teil | Am echten Gerät |
 |---|---|
-| Website, Bilder auf Diskette, HSGIMAGE | ✓ |
+| HTML-Konverter, Bilder auf Diskette, HSGIMAGE | ✓ |
 | HSG-Link mit HSGSER | ✓ |
 | Plot mit Punkten und Kringeln | ✓ (erste Tests) |
 | **Plot mit Schraffur, invertiert** | ✓ (DIREKTPLOT, 16.11.2026) |
@@ -358,7 +381,8 @@ node tools/test-website.js
 
 ## Danksagung und Quellen
 
-- **AndyG** für den **HSG Image Loader** (HSGIMAGE, Juli 2024). Er ist in der Website eingebettet und bildet den Lade-Teil von DIREKTPLOT und HSGMENU.
+- **InsaneDruid** für die **[Low-Speed-Graphik (LSG)](https://github.com/InsaneDruid/Low-Speed-Graphik)**, den Nachbau der HSG-Karte, und für **`bmp2hsg.py`**, das Ur-Programm des Konverters.
+- **AndyG** für den **HSG Image Loader** (HSGIMAGE, Juli 2024). Er ist im HTML-Konverter eingebettet und bildet den Lade-Teil von DIREKTPLOT und HSGMENU.
 - Das **HSG-ROM** (`hcopy`, `tstb`) zeigt, wie man vom Board zurückliest.
 - **[NODISKEMU](https://github.com/nils-eilers/NODISKEMU)** (Nils Eilers) und **[CBM-D9096](https://github.com/InsaneDruid/CBM-D9096)** (InsaneDruid) für das SD-Laufwerk am IEEE-Bus.
 - Die Runde im **[VzEkC-Forum](https://forum.classic-computing.de/)**:
