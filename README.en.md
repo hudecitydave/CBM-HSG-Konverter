@@ -10,7 +10,7 @@
 
 Everything runs on the original CBM without modifying the computer. An HTML converter in the browser prepares the image, and a small 6502 program displays, receives and plots it. For live transfer you only need an Arduino Pro Micro and a home-made userport cable.
 
-> **Language note:** The user interface of the converter and the messages on the CBM are in German. This page quotes them in the original with a translation, e.g. „Bild senden“ (*send image*). The detailed sub-documents (`cbm/README.md`, `serial/README.md`, the PDF manuals) are in German.
+> **Language note:** The user interface of the converter and the messages on the CBM are in German. This page quotes them in the original with a translation, e.g. „Bild senden“ (*send image*). The Complete Guide is available in English; the detailed sub-documents (`cbm/README.md`, `serial/README.md`, the HSG-Link guide) are in German.
 
 ### How it started
 
@@ -60,7 +60,7 @@ Step by step this grew into the present project:
 
 ## Quick start
 
-> 📘 **Printable manual (German):** the **[complete guide (PDF, 16 pages)](CBM-HSG-Komplett-Anleitung.pdf)** covering all use cases, key reference, troubleshooting and appendix. For building the HSG-Link cable there is also the **[HSG-Link guide](HSG-Link-Anleitung.pdf)**.
+> 📘 **Printable manual:** the **[Complete Guide (PDF, 17 pages)](CBM-HSG-Complete-Guide.pdf)** covering all use cases, key reference, troubleshooting and appendix ([German version](CBM-HSG-Komplett-Anleitung.pdf)). For building the HSG-Link cable there is also the **[HSG-Link guide](HSG-Link-Anleitung.pdf)** (German).
 
 1. Open **[`hsg-converter.html`](hsg-converter.html)** in the browser and drop a photo onto it.
 2. Top left, choose your board's chip under **„Grafikchip“** (*graphics chip*) and the target under **„Ausgabe“** (*output*).
@@ -292,9 +292,10 @@ Pinout details: [`serial/README.md`](serial/README.md#verdrahtung) (German).
 
 ```
 hsg-converter.html        HTML converter: image preparation, HSG-Link, plot and 8028 preview, D64 management
-CBM-HSG-Komplett-Anleitung.pdf  complete guide (German): all use cases, keys, troubleshooting, appendix
+CBM-HSG-Complete-Guide.pdf      complete guide (English): all use cases, keys, troubleshooting, appendix
+CBM-HSG-Komplett-Anleitung.pdf  the same guide in German
 HSG-Link-Anleitung.pdf    HSG-Link guide (German): cable, installation, first start
-anleitung/                sources of both guides (HTML); build the PDF: node tools/build-komplett.js
+anleitung/                HTML sources of the guides; build both PDFs: node tools/build-komplett.js
 cbm/                      CBM programs, disks, test images, emulation tests  → cbm/README.md
   hsgmenu.asm/.prg/.d64     main program with menu (disk, HSG-Link, plotter)
   hsgplot.*                 single program: HSG-Link + plotter

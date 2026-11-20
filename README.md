@@ -58,7 +58,7 @@ Daraus wurde Schritt für Schritt dieses Projekt:
 
 ## Schnellstart
 
-> 📘 **Alles zum Ausdrucken:** die **[Komplett-Anleitung (PDF, 16 Seiten)](CBM-HSG-Komplett-Anleitung.pdf)** mit allen Anwendungsfällen, Tastenübersicht, Fehlersuche und Anhang. Für den Bau des HSG-Link-Kabels gibt es zusätzlich die **[HSG-Link-Anleitung](HSG-Link-Anleitung.pdf)**.
+> 📘 **Alles zum Ausdrucken:** die **[Komplett-Anleitung (PDF, 16 Seiten)](CBM-HSG-Komplett-Anleitung.pdf)** mit allen Anwendungsfällen, Tastenübersicht, Fehlersuche und Anhang ([English: Complete Guide](CBM-HSG-Complete-Guide.pdf)). Für den Bau des HSG-Link-Kabels gibt es zusätzlich die **[HSG-Link-Anleitung](HSG-Link-Anleitung.pdf)**.
 
 1. **[`hsg-converter.html`](hsg-converter.html)** im Browser öffnen und ein Foto hineinziehen.
 2. Oben links bei **Grafikchip** den Chip deines Boards wählen und bei **Ausgabe** das Ziel.
@@ -289,8 +289,9 @@ Details zur Belegung: [`serial/README.md`](serial/README.md#verdrahtung).
 ```
 hsg-converter.html        HTML-Konverter: Bildaufbereitung, HSG-Link, Plot- und 8028-Vorschau, D64-Verwaltung
 CBM-HSG-Komplett-Anleitung.pdf  Komplett-Anleitung: alle Anwendungsfälle, Tasten, Fehlersuche, Anhang
+CBM-HSG-Complete-Guide.pdf      dieselbe Anleitung auf Englisch
 HSG-Link-Anleitung.pdf    Anleitung HSG-Link (Kabel, Installation, Inbetriebnahme)
-anleitung/                Quellen beider Anleitungen (HTML); PDF bauen: node tools/build-komplett.js
+anleitung/                HTML-Quellen der Anleitungen; beide PDFs bauen: node tools/build-komplett.js
 cbm/                      CBM-Programme, Disketten, Testbilder, Emulationstests  → cbm/README.md
   hsgmenu.asm/.prg/.d64     Hauptprogramm mit Menü (Diskette, HSG-Link, Plotter)
   hsgplot.*                 Einzelprogramm: HSG-Link + Plotter
